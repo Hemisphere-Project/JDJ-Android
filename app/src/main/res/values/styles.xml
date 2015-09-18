@@ -1,0 +1,20 @@
+<resources>
+
+    <color name="white_opaque">#FFFFFFFF</color>
+    <color name="pitch_black">#FF000000</color>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar.FullScreen">
+    </style>
+    <style name="Theme.AppCompat.Light.NoActionBar.FullScreen" parent="@style/Theme.AppCompat.Light">
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:background">@color/pitch_black</item>
+        <item name="android:windowBackground">@color/pitch_black</item>
+        <item name="android:colorBackground">@color/pitch_black</item>
+        <item name="android:textColor">@color/white_opaque</item>
+    </style>
+
+</resources>
