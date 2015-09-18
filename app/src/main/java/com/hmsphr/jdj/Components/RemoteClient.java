@@ -32,7 +32,7 @@ public class RemoteClient extends ThreadComponent {
         String address = null;
         String data;
 
-        if(poller.poll(1000) > 0) {
+        if(poller.poll(100) > 0) {
             //if (poller.pollin(0)) { // check on first Poll register
 
             data = socket.recvStr();
@@ -41,8 +41,8 @@ public class RemoteClient extends ThreadComponent {
                 // Log received instructions
                 Log.v("mgrlog", address + " : " + data);
 
-                // execute commands
-                // execute( data );
+                // send to Commander
+                // emmit( data );
 
                 // Wait for next address..
                 address = null;

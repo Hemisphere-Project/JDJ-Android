@@ -57,7 +57,7 @@ abstract public class ThreadComponent {
         // Implement me
         // Dummy Loop:
         SystemClock.sleep(1000);
-        Log.v("mgrlog", "a stupid thread is running...");
+        Log.v("jdj-ThreadComponent", "a stupid thread is running...");
     }
 
     // THREAD init -> Override !

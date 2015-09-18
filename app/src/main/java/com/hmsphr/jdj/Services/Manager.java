@@ -7,10 +7,32 @@ import android.os.IBinder;
 import android.os.Binder;
 import android.util.Log;
 
+import com.hmsphr.jdj.Components.Commander;
 import com.hmsphr.jdj.Components.RemoteClient;
+import com.hmsphr.jdj.Components.TimeSync;
 
 public class Manager extends Service {
+
+    /*
+    REMOTE COMMUNICATION CLIENT
+     */
+    private RemoteClient remoteClient = new RemoteClient();
+
+    /*
+    PARSER / CHECKER / DISPATCHER
+     */
+    private Commander commander = new Commander();
+
+    /*
+    TIME SYNCHRONISATION OVER NETWORK
+     */
+    private TimeSync clock = new TimeSync();
+
+    /*
+    CONSTRUCTOR
+     */
     public Manager() {
+        setMode(MODE_OFF);
     }
 
     public static final int MODE_OFF = 0;
@@ -22,17 +44,13 @@ public class Manager extends Service {
     APP STATE
      */
     protected boolean SERVICE_BOUND = false;
-    private int APP_MODE = MODE_OFF;
+    private int APP_MODE;
 
     public void setMode(int mode) {
         APP_MODE = mode;
-        Log.d("jdj-Manager", "Service state: " + APP_MODE);
+        Log.d("jdj-Manager", "App state: " + APP_MODE);
+        commander.setMode(APP_MODE);
     }
-
-    /*
-    REMOTE COMMUNICATION CLIENT
-     */
-    private RemoteClient remoteClient = new RemoteClient();
 
     /*
     SERVICE BINDINGS
@@ -60,6 +78,8 @@ public class Manager extends Service {
         super.onCreate();
         setMode(MODE_OFF);
         remoteClient.start();
+        commander.start();
+        clock.start();
     }
 
     @Override
@@ -93,6 +113,8 @@ public class Manager extends Service {
     @Override
     public void onDestroy() {
         remoteClient.stop();
+        commander.stop();
+        clock.stop();
     }
 
 }
