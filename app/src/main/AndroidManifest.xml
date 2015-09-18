@@ -7,8 +7,15 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+
+        <service
+            android:name=".Services.Manager"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
+
         <activity
-            android:name=".LoadActivity"
+            android:name=".Activities.LoadActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -17,16 +24,11 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".Class.RemoteClient"
-            android:enabled="true"
-            android:exported="true" >
-        </service>
-        <service
-            android:name=".Services.Manager"
-            android:enabled="true"
-            android:exported="true" >
-        </service>
+        <activity
+            android:name=".Activities.WelcomeActivity"
+            android:label="@string/title_activity_welcome"
+            android:parentActivityName=".Activities.LoadActivity" >
+        </activity>
     </application>
 
 </manifest>

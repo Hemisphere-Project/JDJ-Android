@@ -1,30 +1,24 @@
-package com.hmsphr.jdj;
+package com.hmsphr.jdj.Activities;
 
+import android.content.Intent;
 import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.os.Handler;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 
-import com.hmsphr.jdj.Class.ManagerConnector;
+import com.hmsphr.jdj.Class.ManagedActivity;
+import com.hmsphr.jdj.R;
 import com.hmsphr.jdj.Services.Manager;
 
-public class LoadActivity extends AppCompatActivity {
+public class LoadActivity extends ManagedActivity {
 
     // Splash screen timer
     private final static int SPLASH_TIME_OUT = 3000;
 
-    // Manager link
-    private ManagerConnector managerLink = new ManagerConnector();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //set content view AFTER ABOVE sequence (to avoid crash)
         this.setContentView(R.layout.activity_load);
 
         // Fullscreen
@@ -37,25 +31,24 @@ public class LoadActivity extends AppCompatActivity {
             decorView.setSystemUiVisibility(uiOptions);
         }
 
-        // Start Manager
-        Manager.start(this);
-
+        // Set Manager Mode
+        manager.setMode(Manager.MODE_LOAD);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
-        // Bind to Manager
-        managerLink.connect(this, Manager.MODE_LOAD);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        // unBind to Manager
-        managerLink.disconnect(this);
+        // Switch to Welcome screen after Timeout
+        (new Handler()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(getApplicationContext(), WelcomeActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            }
+        }, SPLASH_TIME_OUT);
     }
 
 }
