@@ -11,7 +11,7 @@ abstract public class ThreadComponent {
     public ThreadComponent() {
     }
 
-    private Boolean RUN = true;
+    protected Boolean RUN = true;
     private Thread mThread = new Thread() {
         @Override
         public void run() {

@@ -1,9 +1,6 @@
 package com.hmsphr.jdj.Activities;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import com.hmsphr.jdj.Class.ManagedActivity;
 import com.hmsphr.jdj.R;
