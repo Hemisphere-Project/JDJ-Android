@@ -5,4 +5,8 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_welcome">WelcomeActivity</string>
     <string name="title_activity_player">PlayerActivity</string>
+
+    <string name="player_img">Player Image</string>
+    <string name="player_web">Player Web</string>
+    <string name="player_video">Player Video</string>
 </resources>

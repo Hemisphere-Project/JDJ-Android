@@ -8,6 +8,8 @@ import com.hmsphr.jdj.Services.Manager;
 
 public class PlayerActivity extends ManagedActivity {
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
