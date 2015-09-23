@@ -2,7 +2,9 @@ package com.hmsphr.jdj.Class;
 
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.util.Log;
 import android.view.SurfaceView;
@@ -20,46 +22,41 @@ import com.google.android.exoplayer.text.CaptionStyleCompat;
 import com.google.android.exoplayer.text.Cue;
 import com.google.android.exoplayer.text.SubtitleLayout;
 import com.google.android.exoplayer.util.Util;
-import com.hmsphr.jdj.Class.player.EventLogger;
-import com.hmsphr.jdj.Class.player.ExoPlayerJDJ;
-import com.hmsphr.jdj.Class.player.ExoPlayerJDJ.RendererBuilder;
-import com.hmsphr.jdj.Class.player.ExtractorRendererBuilder;
-import com.hmsphr.jdj.Class.player.HlsRendererBuilder;
+import com.hmsphr.jdj.Class.ExoPlayer.EventLogger;
+import com.hmsphr.jdj.Class.ExoPlayer.ExPlayer;
+import com.hmsphr.jdj.Class.ExoPlayer.ExPlayer.RendererBuilder;
+import com.hmsphr.jdj.Class.ExoPlayer.ExtractorRendererBuilder;
+import com.hmsphr.jdj.Class.ExoPlayer.HlsRendererBuilder;
 
 import java.util.List;
 import java.util.Map;
 
-public class MoviePlayer implements AudioCapabilitiesReceiver.Listener,
-        ExoPlayerJDJ.Listener, ExoPlayerJDJ.CaptionListener, ExoPlayerJDJ.Id3MetadataListener {
-
-    private static final String TAG = "PlayerVIDEO";
+public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.Listener,
+        ExPlayer.Listener, ExPlayer.CaptionListener, ExPlayer.Id3MetadataListener {
 
     private View shutterView;
     private AspectRatioFrameLayout videoFrame;
     private SurfaceView surfaceView;
     private SubtitleLayout subtitleLayout;
 
-    private ExoPlayerJDJ player;
+    private ExPlayer player;
     private boolean playerNeedsPrepare;
     private long playerPosition;
-    private boolean enableBackgroundAudio = false;
     private EventLogger eventLogger;
+    private boolean audioRegistered = false;
 
-    private Context context;
+    private Activity context;
     private AudioCapabilitiesReceiver audioCapabilitiesReceiver;
     private AudioCapabilities audioCapabilities;
 
     private Uri contentUri;
     private int contentType;
-    private String contentId;
 
     public static final int TYPE_HLS = 2;
     public static final int TYPE_OTHER = 3;
 
-    public static final String CONTENT_TYPE_EXTRA = "content_type";
-    public static final String CONTENT_ID_EXTRA = "content_id";
 
-    public MoviePlayer(Context ctx, AspectRatioFrameLayout frameV, SurfaceView surfaceV, View shutterV, SubtitleLayout subsV ) {
+    public MediaPlayerExo(Activity ctx, AspectRatioFrameLayout frameV, SurfaceView surfaceV, View shutterV, SubtitleLayout subsV ) {
         context = ctx;
         videoFrame = frameV;
         surfaceView = surfaceV;
@@ -68,23 +65,50 @@ public class MoviePlayer implements AudioCapabilitiesReceiver.Listener,
         audioCapabilitiesReceiver = new AudioCapabilitiesReceiver(context, this);
     }
 
+    @Override
     public void play(String url)
     {
-        stopPlayer();
-
+        stop();
         contentUri = Uri.parse(url);
-        contentType = intent.getIntExtra(CONTENT_TYPE_EXTRA, -1);
-        contentId = intent.getStringExtra(CONTENT_ID_EXTRA);
-
-        preparePlayer();
-
-        videoFrame.setVisibility(View.VISIBLE);
+        if (url.endsWith("m3u8")) contentType = TYPE_HLS;
+        else contentType = TYPE_OTHER;
+        contentType = TYPE_HLS;
+        resume();
     }
 
-    public void hide() {
-        videoFrame.setVisibility(View.INVISIBLE);
+    @Override
+    public void resume()
+    {
+        audioCapabilitiesReceiver.register();
+        audioRegistered = true;
+        preparePlayer();
+        configureSubtitleView();
+        videoFrame.setVisibility(View.VISIBLE);
+        context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+    }
+
+    @Override
+    public void pause()
+    {
         releasePlayer();
-        audioCapabilitiesReceiver.unregister();
+        if (audioRegistered)
+        {
+            audioCapabilitiesReceiver.unregister();
+            audioRegistered = false;
+        }
+    }
+
+    @Override
+    public void stop() {
+        hide();
+        playerPosition = 0;
+        Log.v("mgrlog","Player stopped..");
+    }
+
+    @Override
+    public void hide() {
+        videoFrame.setVisibility(View.GONE);
+        pause();
     }
 
     // AudioCapabilitiesReceiver.Listener methods
@@ -116,7 +140,7 @@ public class MoviePlayer implements AudioCapabilitiesReceiver.Listener,
 
     private void preparePlayer() {
         if (player == null) {
-            player = new ExoPlayerJDJ(getRendererBuilder());
+            player = new ExPlayer(getRendererBuilder());
             player.addListener(this);
             player.setCaptionListener(this);
             player.setMetadataListener(this);
@@ -139,11 +163,6 @@ public class MoviePlayer implements AudioCapabilitiesReceiver.Listener,
         player.setPlayWhenReady(true);
     }
 
-    private void stopPlayer() {
-        releasePlayer();
-        playerPosition = 0;
-    }
-
     private void releasePlayer() {
         if (player != null) {
             playerPosition = player.getCurrentPosition();
@@ -158,6 +177,10 @@ public class MoviePlayer implements AudioCapabilitiesReceiver.Listener,
 
     @Override
     public void onStateChanged(boolean playWhenReady, int playbackState) {
+
+        // LOOP
+        if (playbackState == ExoPlayer.STATE_ENDED) player.seekTo(0);
+
         String text = "playWhenReady=" + playWhenReady + ", playbackState=";
         switch(playbackState) {
             case ExoPlayer.STATE_BUFFERING:
@@ -179,7 +202,7 @@ public class MoviePlayer implements AudioCapabilitiesReceiver.Listener,
                 text += "unknown";
                 break;
         }
-        Log.i(TAG, ("Video Player "+text));
+        Log.i("jdj-MoviePlayer", ("Video Player "+text));
     }
 
     @Override
@@ -208,19 +231,19 @@ public class MoviePlayer implements AudioCapabilitiesReceiver.Listener,
         for (Map.Entry<String, Object> entry : metadata.entrySet()) {
             if (TxxxMetadata.TYPE.equals(entry.getKey())) {
                 TxxxMetadata txxxMetadata = (TxxxMetadata) entry.getValue();
-                Log.i(TAG, String.format("ID3 TimedMetadata %s: description=%s, value=%s",
+                Log.i("jdj-MoviePlayer", String.format("ID3 TimedMetadata %s: description=%s, value=%s",
                         TxxxMetadata.TYPE, txxxMetadata.description, txxxMetadata.value));
             } else if (PrivMetadata.TYPE.equals(entry.getKey())) {
                 PrivMetadata privMetadata = (PrivMetadata) entry.getValue();
-                Log.i(TAG, String.format("ID3 TimedMetadata %s: owner=%s",
+                Log.i("jdj-MoviePlayer", String.format("ID3 TimedMetadata %s: owner=%s",
                         PrivMetadata.TYPE, privMetadata.owner));
             } else if (GeobMetadata.TYPE.equals(entry.getKey())) {
                 GeobMetadata geobMetadata = (GeobMetadata) entry.getValue();
-                Log.i(TAG, String.format("ID3 TimedMetadata %s: mimeType=%s, filename=%s, description=%s",
+                Log.i("jdj-MoviePlayer", String.format("ID3 TimedMetadata %s: mimeType=%s, filename=%s, description=%s",
                         GeobMetadata.TYPE, geobMetadata.mimeType, geobMetadata.filename,
                         geobMetadata.description));
             } else {
-                Log.i(TAG, String.format("ID3 TimedMetadata %s", entry.getKey()));
+                Log.i("jdj-MoviePlayer", String.format("ID3 TimedMetadata %s", entry.getKey()));
             }
         }
     }

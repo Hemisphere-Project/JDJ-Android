@@ -9,4 +9,16 @@
     <string name="player_img">Player Image</string>
     <string name="player_web">Player Web</string>
     <string name="player_video">Player Video</string>
+
+    <string name="enable_background_audio">Play in background</string>
+    <string name="video">Video</string>
+    <string name="audio">Audio</string>
+    <string name="text">Text</string>
+    <string name="logging">Logging</string>
+    <string name="logging_normal">Normal</string>
+    <string name="logging_verbose">Verbose</string>
+    <string name="retry">Retry</string>
+    <string name="off">[off]</string>
+    <string name="on">[on]</string>
+    <string name="failed">Playback failed</string>
 </resources>

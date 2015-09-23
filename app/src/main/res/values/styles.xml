@@ -3,7 +3,7 @@
     <color name="white_opaque">#FFFFFFFF</color>
     <color name="pitch_black">#FF000000</color>
 
-    <!-- Base application theme. -->
+    <!-- Base application theme.-->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar.FullScreen">
     </style>
     <style name="Theme.AppCompat.Light.NoActionBar.FullScreen" parent="@style/Theme.AppCompat.Light">
@@ -15,6 +15,16 @@
         <item name="android:windowBackground">@color/pitch_black</item>
         <item name="android:colorBackground">@color/pitch_black</item>
         <item name="android:textColor">@color/white_opaque</item>
+    </style>
+
+    <!-- Used only with ExoPlayer => API >= 14 -->
+    <style name="ExoRootTheme" parent="android:Theme.Holo.Light.NoActionBar">
+    </style>
+
+    <!-- Used only with ExoPlayer => API >= 14 -->
+    <style name="ExoPlayerTheme" parent="@style/ExoRootTheme">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/black</item>
     </style>
 
 </resources>

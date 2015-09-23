@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hmsphr.jdj.Class.player;
+package com.hmsphr.jdj.Class.ExoPlayer;
 
 import android.content.Context;
 import android.media.MediaCodec;
@@ -41,7 +41,7 @@ import com.google.android.exoplayer.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer.upstream.DefaultUriDataSource;
 import com.google.android.exoplayer.util.ManifestFetcher;
 import com.google.android.exoplayer.util.ManifestFetcher.ManifestCallback;
-import com.hmsphr.appone.player.DemoPlayer.RendererBuilder;
+import com.hmsphr.jdj.Class.ExoPlayer.ExPlayer.RendererBuilder;
 
 import java.io.IOException;
 import java.util.Map;
@@ -70,7 +70,7 @@ public class HlsRendererBuilder implements RendererBuilder {
   }
 
   @Override
-  public void buildRenderers(DemoPlayer player) {
+  public void buildRenderers(ExPlayer player) {
     currentAsyncBuilder = new AsyncRendererBuilder(context, userAgent, url, audioCapabilities,
         player);
     currentAsyncBuilder.init();
@@ -90,13 +90,13 @@ public class HlsRendererBuilder implements RendererBuilder {
     private final String userAgent;
     private final String url;
     private final AudioCapabilities audioCapabilities;
-    private final DemoPlayer player;
+    private final ExPlayer player;
     private final ManifestFetcher<HlsPlaylist> playlistFetcher;
 
     private boolean canceled;
 
     public AsyncRendererBuilder(Context context, String userAgent, String url,
-        AudioCapabilities audioCapabilities, DemoPlayer player) {
+        AudioCapabilities audioCapabilities, ExPlayer player) {
       this.context = context;
       this.userAgent = userAgent;
       this.url = url;
@@ -154,7 +154,7 @@ public class HlsRendererBuilder implements RendererBuilder {
       HlsChunkSource chunkSource = new HlsChunkSource(dataSource, url, manifest, bandwidthMeter,
           variantIndices, HlsChunkSource.ADAPTIVE_MODE_SPLICE, audioCapabilities);
       HlsSampleSource sampleSource = new HlsSampleSource(chunkSource, loadControl,
-          BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, mainHandler, player, DemoPlayer.TYPE_VIDEO);
+          BUFFER_SEGMENTS * BUFFER_SEGMENT_SIZE, mainHandler, player, ExPlayer.TYPE_VIDEO);
       MediaCodecVideoTrackRenderer videoRenderer = new MediaCodecVideoTrackRenderer(sampleSource,
           MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT, 5000, mainHandler, player, 50);
       MediaCodecAudioTrackRenderer audioRenderer = new MediaCodecAudioTrackRenderer(sampleSource);
@@ -163,11 +163,11 @@ public class HlsRendererBuilder implements RendererBuilder {
       Eia608TrackRenderer closedCaptionRenderer = new Eia608TrackRenderer(sampleSource, player,
           mainHandler.getLooper());
 
-      TrackRenderer[] renderers = new TrackRenderer[DemoPlayer.RENDERER_COUNT];
-      renderers[DemoPlayer.TYPE_VIDEO] = videoRenderer;
-      renderers[DemoPlayer.TYPE_AUDIO] = audioRenderer;
-      renderers[DemoPlayer.TYPE_METADATA] = id3Renderer;
-      renderers[DemoPlayer.TYPE_TEXT] = closedCaptionRenderer;
+      TrackRenderer[] renderers = new TrackRenderer[ExPlayer.RENDERER_COUNT];
+      renderers[ExPlayer.TYPE_VIDEO] = videoRenderer;
+      renderers[ExPlayer.TYPE_AUDIO] = audioRenderer;
+      renderers[ExPlayer.TYPE_METADATA] = id3Renderer;
+      renderers[ExPlayer.TYPE_TEXT] = closedCaptionRenderer;
       player.onRenderers(null, null, renderers, bandwidthMeter);
     }
 

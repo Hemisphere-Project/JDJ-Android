@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hmsphr.jdj.Class.player;
+package com.hmsphr.jdj.Class.ExoPlayer;
 
 import android.media.MediaCodec.CryptoException;
 import android.os.SystemClock;
@@ -33,8 +33,8 @@ import java.util.Locale;
 /**
  * Logs player events using {@link Log}.
  */
-public class EventLogger implements ExoPlayerJDJ.Listener, ExoPlayerJDJ.InfoListener,
-    ExoPlayerJDJ.InternalErrorListener {
+public class EventLogger implements ExPlayer.Listener, ExPlayer.InfoListener,
+    ExPlayer.InternalErrorListener {
 
   private static final String TAG = "EventLogger";
   private static final NumberFormat TIME_FORMAT;
@@ -49,7 +49,7 @@ public class EventLogger implements ExoPlayerJDJ.Listener, ExoPlayerJDJ.InfoList
   private long[] seekRangeValuesUs;
 
   public EventLogger() {
-    loadStartTimeMs = new long[ExoPlayerJDJ.RENDERER_COUNT];
+    loadStartTimeMs = new long[ExPlayer.RENDERER_COUNT];
   }
 
   public void startSession() {
@@ -61,7 +61,7 @@ public class EventLogger implements ExoPlayerJDJ.Listener, ExoPlayerJDJ.InfoList
     Log.d(TAG, "end [" + getSessionTimeString() + "]");
   }
 
-  // ExoPlayerJDJ.Listener
+  // ExPlayer.Listener
 
   @Override
   public void onStateChanged(boolean playWhenReady, int state) {
@@ -79,7 +79,7 @@ public class EventLogger implements ExoPlayerJDJ.Listener, ExoPlayerJDJ.InfoList
     Log.d(TAG, "videoSizeChanged [" + width + ", " + height + ", " + pixelWidthHeightRatio + "]");
   }
 
-  // ExoPlayerJDJ.InfoListener
+  // ExPlayer.InfoListener
 
   @Override
   public void onBandwidthSample(int elapsedMs, long bytes, long bitrateEstimate) {
@@ -124,7 +124,7 @@ public class EventLogger implements ExoPlayerJDJ.Listener, ExoPlayerJDJ.InfoList
             + Integer.toString(trigger) + "]");
   }
 
-  // ExoPlayerJDJ.InternalErrorListener
+  // ExPlayer.InternalErrorListener
 
   @Override
   public void onLoadError(int sourceId, IOException e) {

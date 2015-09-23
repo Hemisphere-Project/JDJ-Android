@@ -9,6 +9,8 @@ import com.hmsphr.jdj.Class.*;
 
 import org.zeromq.ZMQ;
 
+import java.net.UnknownHostException;
+
 public class TimeSync extends ThreadComponent {
 
     private TimePool timePool;
@@ -21,6 +23,7 @@ public class TimeSync extends ThreadComponent {
 
     protected ZMQ.Context context;
     protected ZMQ.Socket socket;
+    protected boolean connected = true;
 
     protected int retriesLeft;
     protected int validated;
@@ -28,18 +31,27 @@ public class TimeSync extends ThreadComponent {
 
     protected void connect() {
         // Connect time server
-        context = ZMQ.context(1);
-        socket = context.socket(ZMQ.REQ);
-        socket.connect("tcp://jdj.hmsphr.com:7588");
-        SystemClock.sleep(200);
-        Log.v("jdj-TimeSync", "Connected to Server");
-        leadingValuesToIgnore = IGNORE_LEADING_VALUES; // new connection: rearm leading value ignore
+        try {
+            context = ZMQ.context(1);
+            socket = context.socket(ZMQ.REQ);
+            socket.connect("tcp://95.142.169.127:7588");
+            SystemClock.sleep(200);
+            Log.v("jdj-TimeSync", "Connected to Server");
+            leadingValuesToIgnore = IGNORE_LEADING_VALUES; // new connection: rearm leading value ignore
+            connected = true;
+        }
+        catch (IllegalArgumentException e) {
+            Log.v("jdj-TimeSync", "Can't connect to the server... try using IP instead of hostname ! "+e);
+            connected = false;
+        }
+
     }
 
     protected void disconnect() {
         // Disconnect Time server
         socket.close();
         context.term();
+        connected = false;
         Log.v("jdj-TimeSync", "Disconnected from Server");
     }
 
@@ -58,6 +70,8 @@ public class TimeSync extends ThreadComponent {
     @Override
     protected void loop()
     {
+        if (!connected) {RUN = false; return;} //  Interrupted
+
         // Init Sample and send request to server
         TimePool.TimeSample sample = timePool.newSample();
         socket.send(sample.initLT1().toString().getBytes());

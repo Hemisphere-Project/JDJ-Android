@@ -1,22 +1,24 @@
 package com.hmsphr.jdj.Class;
 
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v7.app.AppCompatActivity;
 import android.app.ActivityManager;
 import android.util.Log;
+import android.view.View;
 
 import com.hmsphr.jdj.Services.Manager;
 
 /*
 PREPARED ACTIVITY WHICH AUTO BIND/UNBIND TO THE MAIN MANAGER SERVICE
  */
-public class ManagedActivity extends AppCompatActivity {
+public class ManagedActivity extends Activity {
 
     // Connector
     public class ManagerConnector {
@@ -78,6 +80,7 @@ public class ManagedActivity extends AppCompatActivity {
             Manager.start(this);
         }
         //else Log.v("mgrlog", "Manager already started");
+
     }
 
     // Bind to Manager
@@ -97,5 +100,25 @@ public class ManagedActivity extends AppCompatActivity {
         // unBind to Manager
         manager.disconnect(this);
     }
+
+    // Fullscreen
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Fullscreen
+        if (Build.VERSION.SDK_INT>10) {
+            // Hide both the navigation bar and the status bar.
+            View decorView = getWindow().getDecorView();
+            int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+            decorView.setSystemUiVisibility(uiOptions);
+        }
+    }
+
+
 
 }

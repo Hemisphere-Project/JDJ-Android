@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hmsphr.jdj.Class.player;
+package com.hmsphr.jdj.Class.ExoPlayer;
 
 import android.content.Context;
 import android.media.MediaCodec;
@@ -30,12 +30,11 @@ import com.google.android.exoplayer.upstream.DataSource;
 import com.google.android.exoplayer.upstream.DefaultAllocator;
 import com.google.android.exoplayer.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer.upstream.DefaultUriDataSource;
-import com.hmsphr.appone.player.DemoPlayer.RendererBuilder;
 
 /**
- * A {@link RendererBuilder} for streams that can be read using an {@link Extractor}.
+ * A {@link ExPlayer.RendererBuilder} for streams that can be read using an {@link Extractor}.
  */
-public class ExtractorRendererBuilder implements RendererBuilder {
+public class ExtractorRendererBuilder implements ExPlayer.RendererBuilder {
 
   private static final int BUFFER_SEGMENT_SIZE = 64 * 1024;
   private static final int BUFFER_SEGMENT_COUNT = 160;
@@ -51,7 +50,7 @@ public class ExtractorRendererBuilder implements RendererBuilder {
   }
 
   @Override
-  public void buildRenderers(DemoPlayer player) {
+  public void buildRenderers(ExPlayer player) {
     Allocator allocator = new DefaultAllocator(BUFFER_SEGMENT_SIZE);
 
     // Build the video and audio renderers.
@@ -69,10 +68,10 @@ public class ExtractorRendererBuilder implements RendererBuilder {
         player.getMainHandler().getLooper());
 
     // Invoke the callback.
-    TrackRenderer[] renderers = new TrackRenderer[DemoPlayer.RENDERER_COUNT];
-    renderers[DemoPlayer.TYPE_VIDEO] = videoRenderer;
-    renderers[DemoPlayer.TYPE_AUDIO] = audioRenderer;
-    renderers[DemoPlayer.TYPE_TEXT] = textRenderer;
+    TrackRenderer[] renderers = new TrackRenderer[ExPlayer.RENDERER_COUNT];
+    renderers[ExPlayer.TYPE_VIDEO] = videoRenderer;
+    renderers[ExPlayer.TYPE_AUDIO] = audioRenderer;
+    renderers[ExPlayer.TYPE_TEXT] = textRenderer;
     player.onRenderers(null, null, renderers, bandwidthMeter);
   }
 

@@ -1,6 +1,8 @@
 package com.hmsphr.jdj.Class;
 
 
+import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -11,8 +13,9 @@ import android.webkit.WebViewClient;
 
 import com.hmsphr.jdj.R;
 
-public class WebPlayer {
+public class WebPlayer implements PlayerCompat {
 
+    private Activity context;
     private WebView myWebView;
     private String url;
 
@@ -29,7 +32,9 @@ public class WebPlayer {
         }*/
     }
 
-    public WebPlayer(WebView view) {
+    public WebPlayer(Activity ctx, WebView view) {
+
+        context = ctx;
         myWebView = view;
 
         // Prevent external domains
@@ -48,16 +53,35 @@ public class WebPlayer {
         });
     }
 
+    @Override
     public void play(String url)
     {
         //myWebView.clearCache(true);
         myWebView.loadUrl(url);
+        resume();
+    }
+
+    @Override
+    public void resume()
+    {
         myWebView.setVisibility(View.VISIBLE);
+        context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
+    @Override
+    public void pause()
+    {
+        // Do nothing
+    }
+
+    @Override
+    public void stop() {
+        hide();
+    }
+
+    @Override
     public void hide() {
-        myWebView.setVisibility(View.INVISIBLE);
+        myWebView.setVisibility(View.GONE);
     }
-
 
 }

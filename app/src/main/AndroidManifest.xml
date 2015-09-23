@@ -2,11 +2,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hmsphr.jdj" >
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+
+
         <service
             android:name=".Services.Manager"
             android:enabled="true"
@@ -23,22 +29,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".Activities.WelcomeActivity"
             android:label="@string/title_activity_welcome"
             android:launchMode="singleTask"
             android:alwaysRetainTaskState="true" >
         </activity>
+
         <activity
-            android:name=".Activities.PlayerActivity"
-            android:label="@string/title_activity_player"
-            android:parentActivityName=".Activities.WelcomeActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.hmsphr.jdj.Activities.WelcomeActivity"
-                android:launchMode="singleTask"
-                android:alwaysRetainTaskState="true" />
-        </activity>
+            android:name=".Activities.PlayersActivity"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:parentActivityName=".Activities.WelcomeActivity"
+            android:theme="@style/ExoPlayerTheme" />
+
     </application>
 
 </manifest>
