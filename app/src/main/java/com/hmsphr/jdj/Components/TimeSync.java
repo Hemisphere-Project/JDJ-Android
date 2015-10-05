@@ -29,12 +29,20 @@ public class TimeSync extends ThreadComponent {
     protected int validated;
     protected int leadingValuesToIgnore;
 
+    private int PORT_TIME;
+    private String IP_TIME;
+
+    public TimeSync(String ip, int port) {
+        PORT_TIME = port;
+        IP_TIME = ip;
+    }
+
     protected void connect() {
         // Connect time server
         try {
             context = ZMQ.context(1);
             socket = context.socket(ZMQ.REQ);
-            socket.connect("tcp://95.142.169.127:7588");
+            socket.connect(String.format("tcp://%s:%d", IP_TIME, PORT_TIME));
             SystemClock.sleep(200);
             Log.v("jdj-TimeSync", "Connected to Server");
             leadingValuesToIgnore = IGNORE_LEADING_VALUES; // new connection: rearm leading value ignore

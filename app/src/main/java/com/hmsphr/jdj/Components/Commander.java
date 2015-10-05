@@ -25,7 +25,7 @@ public class Commander extends ThreadComponent {
     protected void loop()
     {
         SystemClock.sleep(2000);
-        Log.v("jdj-Commander", "Commander waiting in mode: "+MODE);
+        //Log.v("jdj-Commander", "Commander waiting in mode: "+MODE);
     }
 
     @Override

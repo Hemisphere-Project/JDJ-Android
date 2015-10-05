@@ -16,7 +16,7 @@ public class Manager extends Service {
     /*
     REMOTE COMMUNICATION CLIENT
      */
-    private RemoteClient remoteClient = new RemoteClient();
+    private RemoteClient remoteClient = new RemoteClient("10.0.2.2", 8081, "zenner");
 
     /*
     PARSER / CHECKER / DISPATCHER
@@ -26,7 +26,7 @@ public class Manager extends Service {
     /*
     TIME SYNCHRONISATION OVER NETWORK
      */
-    private TimeSync clock = new TimeSync();
+    private TimeSync clock = new TimeSync("10.0.2.2", 8082);
 
     /*
     CONSTRUCTOR
