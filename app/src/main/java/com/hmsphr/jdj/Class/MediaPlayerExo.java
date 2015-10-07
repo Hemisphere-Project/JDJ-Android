@@ -72,7 +72,6 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
         contentUri = Uri.parse(url);
         if (url.endsWith("m3u8")) contentType = TYPE_HLS;
         else contentType = TYPE_OTHER;
-        contentType = TYPE_HLS;
         resume();
     }
 

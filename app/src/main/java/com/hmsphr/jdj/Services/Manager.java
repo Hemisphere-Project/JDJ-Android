@@ -8,25 +8,27 @@ import android.os.Binder;
 import android.util.Log;
 
 import com.hmsphr.jdj.Components.Commander;
-import com.hmsphr.jdj.Components.RemoteClient;
+import com.hmsphr.jdj.Components.RemoteControl;
 import com.hmsphr.jdj.Components.TimeSync;
 
 public class Manager extends Service {
 
+    private String IP = "10.0.2.2";
+
     /*
     REMOTE COMMUNICATION CLIENT
      */
-    private RemoteClient remoteClient = new RemoteClient("10.0.2.2", 8081, "zenner");
+    private RemoteControl remoteControl = new RemoteControl(this, IP, 8081);
 
     /*
     PARSER / CHECKER / DISPATCHER
      */
-    private Commander commander = new Commander();
+    //private Commander commander = new Commander();
 
     /*
     TIME SYNCHRONISATION OVER NETWORK
      */
-    private TimeSync clock = new TimeSync("10.0.2.2", 8082);
+    private TimeSync clock = new TimeSync(IP, 8082);
 
     /*
     CONSTRUCTOR
@@ -49,7 +51,7 @@ public class Manager extends Service {
     public void setMode(int mode) {
         APP_MODE = mode;
         Log.d("jdj-Manager", "App state: " + APP_MODE);
-        commander.setMode(APP_MODE);
+        remoteControl.setMode(APP_MODE);
     }
 
     /*
@@ -77,8 +79,8 @@ public class Manager extends Service {
     public void onCreate() {
         super.onCreate();
         setMode(MODE_OFF);
-        remoteClient.start();
-        commander.start();
+        remoteControl.start();
+        //commander.start();
         clock.start();
     }
 
@@ -112,8 +114,8 @@ public class Manager extends Service {
 
     @Override
     public void onDestroy() {
-        remoteClient.stop();
-        commander.stop();
+        remoteControl.stop();
+        //commander.stop();
         clock.stop();
     }
 

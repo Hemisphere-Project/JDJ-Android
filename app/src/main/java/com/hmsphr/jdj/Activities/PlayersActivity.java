@@ -17,6 +17,9 @@ import com.hmsphr.jdj.Class.WebPlayer;
 import com.hmsphr.jdj.R;
 import com.hmsphr.jdj.Services.Manager;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class PlayersActivity extends ManagedActivity {
 
     private WebPlayer webPlayer;
@@ -32,7 +35,6 @@ public class PlayersActivity extends ManagedActivity {
         manager.setMode(Manager.MODE_PLAY);
 
         // Configure HLS movie player
-
         moviePlayerExo = new MediaPlayerExo(this, (AspectRatioFrameLayout) findViewById(R.id.playerVIDEO),
                                             (SurfaceView) findViewById(R.id.playerVIDEO_surface),
                                             (View) findViewById(R.id.playerVIDEO_shutter),
@@ -50,17 +52,41 @@ public class PlayersActivity extends ManagedActivity {
         webPlayer.hide();
     }
 
+    public void stopAll() {
+        moviePlayerExo.stop();
+        webPlayer.stop();
+    }
+
     @Override
     protected void  onNewIntent (Intent intent) {
         super.onNewIntent(intent);
-        Log.v("mgrlog", "Intent received.." + intent);
 
-        hideAll();
-        currentPlayer = null;
-        if (intent.getDataString().endsWith("m3u8")) currentPlayer = moviePlayerExo;
-        else currentPlayer = webPlayer;
+        // Parse Intent
+        Bundle extras = intent.getExtras();
+        String action = extras.getString("action");
+        String category = extras.getString("category");
+        String url = extras.getString("url");
 
-        if (currentPlayer != null) currentPlayer.play(intent.getDataString());
+        // Execute command
+        if(action != null && category != null && url != null)
+        {
+            // STOP
+            if (action.equals("stop")) stopAll();
+
+            // PLAY
+            else if (action.equals("play")) {
+                stopAll();
+                currentPlayer = null;
+
+                if (category.equals("url")) currentPlayer = webPlayer;
+                else if (category.equals("audio")) currentPlayer = moviePlayerExo;
+                else if (category.equals("video")) currentPlayer = moviePlayerExo;
+
+                if (currentPlayer != null) currentPlayer.play( url );
+            }
+        }
+        else Log.e("PlayersActivity", "Malformed command: action="+action+" cat="+category+" url="+url);
+
     }
 
     @Override
