@@ -35,7 +35,6 @@ public class LoadActivity extends ManagedActivity {
             @Override
             public void run() {
                 Intent intent = new Intent(getApplicationContext(), WelcomeActivity.class);
-                //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
             }
         }, SPLASH_TIME_OUT);

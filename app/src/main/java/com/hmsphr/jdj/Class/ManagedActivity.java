@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.app.ActivityManager;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 
 import com.hmsphr.jdj.Services.Manager;
 
@@ -19,6 +20,9 @@ import com.hmsphr.jdj.Services.Manager;
 PREPARED ACTIVITY WHICH AUTO BIND/UNBIND TO THE MAIN MANAGER SERVICE
  */
 public class ManagedActivity extends Activity {
+
+    // internal Player
+    protected PlayerCompat player = null;
 
     // Connector
     public class ManagerConnector {
@@ -81,6 +85,7 @@ public class ManagedActivity extends Activity {
         }
         //else Log.v("mgrlog", "Manager already started");
 
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     // Bind to Manager
@@ -99,6 +104,41 @@ public class ManagedActivity extends Activity {
 
         // unBind to Manager
         manager.disconnect(this);
+
+    }
+
+    @Override
+    protected void onNewIntent (Intent intent) {
+        super.onNewIntent(intent);
+
+        // Check if player is available
+        if (player != null) {
+            // Parse Intent
+            Bundle extras = intent.getExtras();
+            if (extras == null) {
+                error("Intent must provide extras");
+                return;
+            }
+            String action = extras.getString("action");
+            if (action == null) {
+                error("Intent must provide an action");
+                return;
+            }
+
+            // Execute command
+            // STOP
+            if (action.equals("stop")) {
+                player.stop();
+                finish();
+            }
+
+            // PLAY
+            else if (action.equals("play")) {
+                String url = extras.getString("url");
+                if (url == null) {error("Play action must provide an url");  return;}
+                player.play( url );
+            }
+        }
     }
 
     // Fullscreen
@@ -117,8 +157,34 @@ public class ManagedActivity extends Activity {
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
             decorView.setSystemUiVisibility(uiOptions);
         }
+        // Player resume
+        if (player != null) player.resume();
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (player != null) player.pause();
+    }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (player != null) player.stop();
+    }
 
+    protected void error(String err) {
+        Log.e("Activity", err);
+    }
+    protected void warning(String err) {
+        Log.w("Activity", err);
+    }
+
+    protected void info(String err) {
+        Log.i("Activity", err);
+    }
+
+    protected void debug(String err) {
+        Log.d("Activity", err);
+    }
 }

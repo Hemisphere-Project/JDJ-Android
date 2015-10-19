@@ -22,7 +22,8 @@
         <activity
             android:name=".Activities.LoadActivity"
             android:label="@string/app_name"
-            android:noHistory="true" >
+            android:screenOrientation="landscape"
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,19 +33,39 @@
 
         <activity
             android:name=".Activities.WelcomeActivity"
+            android:screenOrientation="landscape"
             android:label="@string/title_activity_welcome"
             android:launchMode="singleTask"
             android:alwaysRetainTaskState="true" >
         </activity>
 
         <activity
-            android:name=".Activities.PlayersActivity"
+            android:name=".Activities.WebActivity"
+            android:screenOrientation="landscape"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:noHistory="true" >
+        </activity>
+
+        <activity
+            android:name=".Activities.VideoActivity"
             android:screenOrientation="landscape"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name"
             android:launchMode="singleTask"
             android:parentActivityName=".Activities.WelcomeActivity"
-            android:theme="@style/ExoPlayerTheme" />
+            android:theme="@style/ExoPlayerTheme"
+            android:noHistory="true" />
+
+        <activity
+            android:name=".Activities.AudioActivity"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:parentActivityName=".Activities.WelcomeActivity"
+            android:theme="@style/ExoPlayerTheme"
+            android:noHistory="true" />
 
     </application>
 

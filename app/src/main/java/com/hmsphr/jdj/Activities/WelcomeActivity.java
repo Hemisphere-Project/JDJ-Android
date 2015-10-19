@@ -1,7 +1,6 @@
 package com.hmsphr.jdj.Activities;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 
@@ -23,9 +22,9 @@ public class WelcomeActivity extends ManagedActivity {
     // GO button
     public void startPlayer(View view) {
         // Do something in response to button
-        Intent mpdIntent = new Intent(this, PlayersActivity.class)
-                //.setData(Uri.parse("http://hls.hmsphr.com/vidz/tears/tears.m3u8"));
-                .setData(Uri.parse("http://crr93.fr"));
+        Intent mpdIntent = new Intent(this, VideoActivity.class)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .putExtra("action", "wait");
         startActivity(mpdIntent);
     }
 

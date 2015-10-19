@@ -6,11 +6,14 @@ import org.zeromq.ZMQ;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.util.Log;
 
-import com.hmsphr.jdj.Activities.PlayersActivity;
+import com.hmsphr.jdj.Activities.AudioActivity;
+import com.hmsphr.jdj.Activities.VideoActivity;
+import com.hmsphr.jdj.Activities.WebActivity;
+import com.hmsphr.jdj.Activities.WelcomeActivity;
 import com.hmsphr.jdj.Class.ThreadComponent;
+import com.hmsphr.jdj.Services.Manager;
 
 
 public class RemoteControl extends ThreadComponent {
@@ -76,18 +79,41 @@ public class RemoteControl extends ThreadComponent {
                     //TODO
                     // - check if file is available in local
                     // - use atTime for synced play
+                    // - dispatch with MODE
 
-                    //Prepare Intent
-                    Intent cmdIntent = new Intent(appContext, PlayersActivity.class)
-                                                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                .putExtra("mode", "remote");
+                    if (MODE >= Manager.MODE_WELCOME) {
 
-                    // Put CMD
-                    cmdIntent.putExtra("action",    command.getString("action"));
-                    cmdIntent.putExtra("category",  command.getString("category"));
-                    cmdIntent.putExtra("url",       command.getString("url"));
+                        if (command.has("action")) {
 
-                    appContext.startActivity(cmdIntent);
+                            Intent cmdIntent = new Intent(appContext, WelcomeActivity.class);
+
+                            if (command.has("category"))
+                            {
+                                String cat = command.getString("category");
+                                if (cat.equals("url"))
+                                    cmdIntent = new Intent(appContext, WebActivity.class);
+                                else if (cat.equals("video"))
+                                    cmdIntent = new Intent(appContext, VideoActivity.class);
+                                else if (cat.equals("audio"))
+                                    cmdIntent = new Intent(appContext, AudioActivity.class);
+                            }
+
+                            cmdIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                            if (command.has("action"))
+                                cmdIntent.putExtra("action", command.getString("action"));
+
+                            // TODO CHECK IF LOCAL FILE EXIST !
+                            if (command.has("url")) {
+                                cmdIntent.putExtra("mode", "remote");
+                                cmdIntent.putExtra("url", command.getString("url"));
+                            }
+
+                            appContext.startActivity(cmdIntent);
+                        }
+                        else Log.d("action missing ", command.toString());
+
+                    }
 
                 } catch (JSONException e) {
                     throw new RuntimeException(e);

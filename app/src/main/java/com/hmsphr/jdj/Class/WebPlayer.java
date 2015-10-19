@@ -37,8 +37,12 @@ public class WebPlayer implements PlayerCompat {
         context = ctx;
         myWebView = view;
 
+        //myWebView.getSettings().setLoadWithOverviewMode(true);
+        //myWebView.getSettings().setUseWideViewPort(true);
+
+
         // Prevent external domains
-        myWebView.setWebViewClient(new ProtectedViewClient());
+        myWebView.setWebViewClient(new WebViewClient());
 
         // Enable Javascript
         WebSettings webSettings = myWebView.getSettings();

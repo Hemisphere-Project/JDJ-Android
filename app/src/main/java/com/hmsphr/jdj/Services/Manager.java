@@ -13,7 +13,8 @@ import com.hmsphr.jdj.Components.TimeSync;
 
 public class Manager extends Service {
 
-    private String IP = "10.0.2.2";
+    //private String IP = "192.168.1.11";
+    private String IP = "jdj.hmsphr.com";
 
     /*
     REMOTE COMMUNICATION CLIENT
