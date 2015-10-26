@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hmsphr.jdj.Class.ExoPlayer;
+package com.hmsphr.jdj.Components.Players.ExoPlayer;
 
 import android.media.MediaCodec.CryptoException;
 import android.os.Handler;

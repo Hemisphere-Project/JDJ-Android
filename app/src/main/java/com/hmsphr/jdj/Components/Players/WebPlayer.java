@@ -1,23 +1,19 @@
-package com.hmsphr.jdj.Class;
+package com.hmsphr.jdj.Components.Players;
 
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
-import android.net.Uri;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.hmsphr.jdj.R;
-
 public class WebPlayer implements PlayerCompat {
 
     private Activity context;
     private WebView myWebView;
-    private String url;
+    private String contentUri;
 
     /** WEBCLIENT: disable foreigns domains **/
     private class ProtectedViewClient extends WebViewClient {
@@ -57,33 +53,33 @@ public class WebPlayer implements PlayerCompat {
         });
     }
 
-    @Override
-    public void play(String url)
+    public void load(String url) {
+        contentUri = url;
+    }
+
+    public void play()
     {
         //myWebView.clearCache(true);
-        myWebView.loadUrl(url);
+        myWebView.loadUrl(contentUri);
         resume();
     }
 
-    @Override
     public void resume()
     {
         myWebView.setVisibility(View.VISIBLE);
-        context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
-    @Override
     public void pause()
     {
         // Do nothing
     }
 
-    @Override
     public void stop() {
         hide();
+        myWebView.loadUrl("about:blank");
     }
 
-    @Override
     public void hide() {
         myWebView.setVisibility(View.GONE);
     }

@@ -1,14 +1,13 @@
-package com.hmsphr.jdj.Class;
-
-import android.net.Uri;
-import android.view.View;
+package com.hmsphr.jdj.Components.Players;
 
 /**
  * Created by mgr on 23/09/15.
  */
 public interface PlayerCompat {
 
-    public void play(String url);
+    public void load(String url);
+
+    public void play();
 
     public void resume();
 

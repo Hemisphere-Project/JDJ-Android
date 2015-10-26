@@ -85,8 +85,13 @@ public class RemoteControl extends ThreadComponent {
 
                         if (command.has("action")) {
 
+                            // BACK TO WELCOME ACTIVITY
                             Intent cmdIntent = new Intent(appContext, WelcomeActivity.class);
+                            cmdIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            cmdIntent.putExtra("action", command.getString("action"));
+                            appContext.startActivity(cmdIntent);
 
+                            // LAUNCH NEW PLAYER
                             if (command.has("category"))
                             {
                                 String cat = command.getString("category");
@@ -96,20 +101,18 @@ public class RemoteControl extends ThreadComponent {
                                     cmdIntent = new Intent(appContext, VideoActivity.class);
                                 else if (cat.equals("audio"))
                                     cmdIntent = new Intent(appContext, AudioActivity.class);
-                            }
 
-                            cmdIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                            if (command.has("action"))
+                                cmdIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 cmdIntent.putExtra("action", command.getString("action"));
 
-                            // TODO CHECK IF LOCAL FILE EXIST !
-                            if (command.has("url")) {
-                                cmdIntent.putExtra("mode", "remote");
-                                cmdIntent.putExtra("url", command.getString("url"));
-                            }
+                                // TODO CHECK IF LOCAL FILE EXIST !
+                                if (command.has("url")) {
+                                    cmdIntent.putExtra("mode", "remote");
+                                    cmdIntent.putExtra("url", command.getString("url"));
+                                }
 
-                            appContext.startActivity(cmdIntent);
+                                appContext.startActivity(cmdIntent);
+                            }
                         }
                         else Log.d("action missing ", command.toString());
 

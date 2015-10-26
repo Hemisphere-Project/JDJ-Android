@@ -1,0 +1,33 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="horizontal"
+    tools:context="com.hmsphr.jdj.Activities.VideoActivity"
+    android:background="#000000">
+
+    <com.google.android.exoplayer.AspectRatioFrameLayout android:id="@+id/playerVIDEO"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:contentDescription="@string/player_video">
+
+        <SurfaceView android:id="@+id/playerVIDEO_surface"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"/>
+
+        <com.google.android.exoplayer.text.SubtitleLayout android:id="@+id/playerVIDEO_subtitles"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <View android:id="@+id/playerVIDEO_shutter"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/black"/>
+
+    </com.google.android.exoplayer.AspectRatioFrameLayout>
+
+</RelativeLayout>

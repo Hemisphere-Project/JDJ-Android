@@ -37,6 +37,11 @@ public class TimeSync extends ThreadComponent {
         IP_TIME = ip;
     }
 
+    // return waiting time before reaching server timestamp
+    public long timeTo(long timestamp) {
+        return (timestamp - Long.valueOf(timePool.getTimeMilliSynced()));
+    }
+
     protected void connect() {
         // Connect time server
         try {

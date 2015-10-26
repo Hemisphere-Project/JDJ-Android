@@ -6,12 +6,12 @@ import android.view.View;
 
 import com.google.android.exoplayer.AspectRatioFrameLayout;
 import com.google.android.exoplayer.text.SubtitleLayout;
-import com.hmsphr.jdj.Class.ManagedActivity;
-import com.hmsphr.jdj.Class.MediaPlayerExo;
+import com.hmsphr.jdj.Class.MediaActivity;
+import com.hmsphr.jdj.Components.Players.MediaPlayerExo;
 import com.hmsphr.jdj.R;
 import com.hmsphr.jdj.Services.Manager;
 
-public class AudioActivity extends ManagedActivity {
+public class AudioActivity extends MediaActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

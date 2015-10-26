@@ -1,4 +1,4 @@
-package com.hmsphr.jdj.Class;
+package com.hmsphr.jdj.Components.Players;
 
 
 import android.annotation.TargetApi;
@@ -22,11 +22,11 @@ import com.google.android.exoplayer.text.CaptionStyleCompat;
 import com.google.android.exoplayer.text.Cue;
 import com.google.android.exoplayer.text.SubtitleLayout;
 import com.google.android.exoplayer.util.Util;
-import com.hmsphr.jdj.Class.ExoPlayer.EventLogger;
-import com.hmsphr.jdj.Class.ExoPlayer.ExPlayer;
-import com.hmsphr.jdj.Class.ExoPlayer.ExPlayer.RendererBuilder;
-import com.hmsphr.jdj.Class.ExoPlayer.ExtractorRendererBuilder;
-import com.hmsphr.jdj.Class.ExoPlayer.HlsRendererBuilder;
+import com.hmsphr.jdj.Components.Players.ExoPlayer.EventLogger;
+import com.hmsphr.jdj.Components.Players.ExoPlayer.ExPlayer;
+import com.hmsphr.jdj.Components.Players.ExoPlayer.ExPlayer.RendererBuilder;
+import com.hmsphr.jdj.Components.Players.ExoPlayer.ExtractorRendererBuilder;
+import com.hmsphr.jdj.Components.Players.ExoPlayer.HlsRendererBuilder;
 
 import java.util.List;
 import java.util.Map;
@@ -65,17 +65,18 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
         audioCapabilitiesReceiver = new AudioCapabilitiesReceiver(context, this);
     }
 
-    @Override
-    public void play(String url)
-    {
-        stop();
+    public void load(String url) {
         contentUri = Uri.parse(url);
         if (url.endsWith("m3u8")) contentType = TYPE_HLS;
         else contentType = TYPE_OTHER;
+    }
+
+    public void play()
+    {
+        stop();
         resume();
     }
 
-    @Override
     public void resume()
     {
         audioCapabilitiesReceiver.register();
@@ -86,7 +87,6 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
         context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
-    @Override
     public void pause()
     {
         releasePlayer();
@@ -97,14 +97,12 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
         }
     }
 
-    @Override
     public void stop() {
         hide();
         playerPosition = 0;
-        Log.v("mgrlog","Player stopped..");
+        Log.v("mgrlog", "Player stopped..");
     }
 
-    @Override
     public void hide() {
         videoFrame.setVisibility(View.GONE);
         pause();

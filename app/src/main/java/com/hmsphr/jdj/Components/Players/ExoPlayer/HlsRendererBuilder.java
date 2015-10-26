@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hmsphr.jdj.Class.ExoPlayer;
+package com.hmsphr.jdj.Components.Players.ExoPlayer;
 
 import android.content.Context;
 import android.media.MediaCodec;
@@ -41,7 +41,7 @@ import com.google.android.exoplayer.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer.upstream.DefaultUriDataSource;
 import com.google.android.exoplayer.util.ManifestFetcher;
 import com.google.android.exoplayer.util.ManifestFetcher.ManifestCallback;
-import com.hmsphr.jdj.Class.ExoPlayer.ExPlayer.RendererBuilder;
+import com.hmsphr.jdj.Components.Players.ExoPlayer.ExPlayer.RendererBuilder;
 
 import java.io.IOException;
 import java.util.Map;
