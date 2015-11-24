@@ -19,9 +19,6 @@ public class VideoActivity extends MediaActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Set Manager Mode
-        manager.setMode(Manager.MODE_PLAY);
-
         int currentapiVersion = android.os.Build.VERSION.SDK_INT;
         if (currentapiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN)
         {
@@ -48,6 +45,13 @@ public class VideoActivity extends MediaActivity {
         onNewIntent(getIntent());
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Set Manager Mode
+        manager.setMode(Manager.MODE_PLAY);
+    }
 
 
 }

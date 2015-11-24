@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.Binder;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.hmsphr.jdj.Components.Commander;
@@ -80,6 +81,7 @@ public class Manager extends Service {
     public void onCreate() {
         super.onCreate();
         setMode(MODE_OFF);
+
         remoteControl.start();
         //commander.start();
         clock.start();

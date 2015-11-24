@@ -15,14 +15,19 @@ public class WebActivity extends MediaActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web);
 
-        // Set Manager Mode
-        manager.setMode(Manager.MODE_PLAY);
-
         // Configure WebView
         player = new WebPlayer(this, (WebView) findViewById(R.id.playerWEB) );
 
         // Transfer first intent
         onNewIntent(getIntent());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Set Manager Mode
+        manager.setMode(Manager.MODE_PLAY);
     }
 
 }

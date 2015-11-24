@@ -18,9 +18,6 @@ public class AudioActivity extends MediaActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_audio);
 
-        // Set Manager Mode
-        manager.setMode(Manager.MODE_PLAY);
-
         // Configure HLS movie player
         player = new MediaPlayerExo(this, (AspectRatioFrameLayout) findViewById(R.id.playerVIDEO),
                                             (SurfaceView) findViewById(R.id.playerVIDEO_surface),
@@ -31,6 +28,12 @@ public class AudioActivity extends MediaActivity {
         onNewIntent(getIntent());
     }
 
-    
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Set Manager Mode
+        manager.setMode(Manager.MODE_PLAY);
+    }
 
 }
