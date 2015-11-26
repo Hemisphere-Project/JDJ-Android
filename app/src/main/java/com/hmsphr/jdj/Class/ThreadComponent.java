@@ -11,7 +11,7 @@ abstract public class ThreadComponent {
     public ThreadComponent() {
     }
 
-    protected Boolean RUN = true;
+    protected Boolean RUN = false;
     private Thread mThread = new Thread() {
         @Override
         public void run() {
@@ -22,20 +22,28 @@ abstract public class ThreadComponent {
 
     // START Thread action
     public void start() {
-        stop();
-        RUN = true;
-        this.mThread.start();
+        if (!isRunning()) {
+            RUN = true;
+            this.mThread.start();
+        }
     }
 
     // STOP Thread action
     public void stop() {
-        RUN = false;
-        try {
-            this.mThread.join(300); // wait for subscriber to finish
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        if (isRunning()) {
+            RUN = false;
+            try {
+                this.mThread.join(300); // wait for subscriber to finish
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            if (this.mThread.isAlive()) this.mThread.interrupt(); // force subscriber to stop
         }
-        if (this.mThread.isAlive()) this.mThread.interrupt(); // force subscriber to stop
+    }
+
+    // is RUNning ?
+    public boolean isRunning() {
+        return RUN;
     }
 
     // THREAD sequence

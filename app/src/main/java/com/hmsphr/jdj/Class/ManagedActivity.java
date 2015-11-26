@@ -2,9 +2,11 @@ package com.hmsphr.jdj.Class;
 
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,7 +28,7 @@ public class ManagedActivity extends Activity {
 
         public Manager service;
 
-        protected int MODE = Manager.MODE_OFF;
+        protected int MODE = Manager.MODE_STANDBY;
 
         private boolean mIsBound = false;
 
@@ -61,10 +63,21 @@ public class ManagedActivity extends Activity {
         public void setMode(int mode) {
             MODE = mode;
         }
+
+        public void stopApp() {
+            service.stopApp();
+        }
     }
 
     // Manager connector link
     protected ManagerConnector manager = new ManagerConnector();
+
+    private final BroadcastReceiver exitsignal = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            finish();
+        }
+    };
 
     // Auto-start Manager if not already existing
     @Override
@@ -81,6 +94,9 @@ public class ManagedActivity extends Activity {
             Manager.start(this);
         }
         //else Log.v("mgrlog", "Manager already started");
+
+        // Subscribe to exit signal
+        registerReceiver(exitsignal, new IntentFilter("exit_jdj"));
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
@@ -121,6 +137,12 @@ public class ManagedActivity extends Activity {
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
             decorView.setSystemUiVisibility(uiOptions);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(exitsignal);
     }
 
     protected void error(String err) {

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="VERSION_MAJOR">0</integer>
+    <integer name="VERSION_MINOR">1</integer>
+
+    <integer name="APP_TIMEOUT_NOACTIVITY">1440</integer> <!-- Minutes -->
+
+    <string name="IP_PROXY">app.journaldunseuljour.fr</string>
+    <integer name="PORT_PUB">8081</integer>
+    <integer name="PORT_INFO">8090</integer>
+    <integer name="PORT_TIME">8082</integer>
+
+
+
+</resources>

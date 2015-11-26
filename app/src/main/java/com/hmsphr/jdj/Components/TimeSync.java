@@ -1,11 +1,13 @@
 package com.hmsphr.jdj.Components;
 
 
+import android.content.Context;
 import android.os.SystemClock;
 import android.util.Log;
 
 import com.hmsphr.jdj.Class.ThreadComponent;
 import com.hmsphr.jdj.Class.*;
+import com.hmsphr.jdj.R;
 
 import org.zeromq.ZMQ;
 
@@ -29,12 +31,10 @@ public class TimeSync extends ThreadComponent {
     protected int validated;
     protected int leadingValuesToIgnore;
 
-    private int PORT_TIME;
-    private String IP_TIME;
+    private Context appContext;
 
-    public TimeSync(String ip, int port) {
-        PORT_TIME = port;
-        IP_TIME = ip;
+    public TimeSync(Context ctx) {
+        appContext = ctx;
     }
 
     // return waiting time before reaching server timestamp
@@ -47,7 +47,9 @@ public class TimeSync extends ThreadComponent {
         try {
             context = ZMQ.context(1);
             socket = context.socket(ZMQ.REQ);
-            socket.connect(String.format("tcp://%s:%d", IP_TIME, PORT_TIME));
+            socket.connect(String.format("tcp://%s:%d",
+                    appContext.getResources().getString(R.string.IP_PROXY),
+                    appContext.getResources().getInteger(R.integer.PORT_TIME)));
             SystemClock.sleep(200);
             Log.v("jdj-TimeSync", "Connected to Server");
             leadingValuesToIgnore = IGNORE_LEADING_VALUES; // new connection: rearm leading value ignore
