@@ -17,6 +17,7 @@ import com.hmsphr.jdj.Activities.AudioActivity;
 import com.hmsphr.jdj.Activities.VideoActivity;
 import com.hmsphr.jdj.Activities.WebActivity;
 import com.hmsphr.jdj.Activities.WelcomeActivity;
+import com.hmsphr.jdj.Class.Mailbox;
 import com.hmsphr.jdj.Class.ThreadComponent;
 import com.hmsphr.jdj.R;
 import com.hmsphr.jdj.Services.Manager;
@@ -38,7 +39,6 @@ public class RemoteControl extends ThreadComponent {
 
     private ZMQ.Context context = ZMQ.context(1);
     private ZMQ.Socket remotePublisher = context.socket(ZMQ.SUB);
-    private ZMQ.Socket manager = context.socket(ZMQ.DEALER);
     private ZMQ.Poller poller = new ZMQ.Poller(100);
 
     private Socket mSocket;
@@ -53,6 +53,14 @@ public class RemoteControl extends ThreadComponent {
 
     public RemoteControl(Context ctx) {
         appContext = ctx;
+    }
+
+    /*
+    MESSAGE SENDER
+     */
+    private Mailbox mail(String msg) {
+        Mailbox mail = new Mailbox();
+        return mail.put(msg).from(appContext);
     }
 
     public void setMode(int mode) {
@@ -107,8 +115,7 @@ public class RemoteControl extends ThreadComponent {
     protected void init() {
         Log.d("RC-client", "-- RemoteControl starting");
 
-        //connect to Manager
-        manager.connect("inproc://manager");
+        SystemClock.sleep(1000);
 
         // init lastactivity timestamp
         lastactivity = System.currentTimeMillis();
@@ -121,10 +128,12 @@ public class RemoteControl extends ThreadComponent {
     {
         // EXIT IF NOTHING HAPPENS..
         // TODO
-        if (System.currentTimeMillis()-lastactivity > APP_TIMEOUT) informManager("application_timeout");
+        if (System.currentTimeMillis()-lastactivity > APP_TIMEOUT)
+            mail("application_timeout").to(Manager.class).send();
 
         // check if network is available
         if (!isNetworkAvailable()) {
+            mail("update_state").to(Manager.class).add("state", Manager.STATE_NONET).send();
             SystemClock.sleep(1000);
             return;
         }
@@ -156,7 +165,7 @@ public class RemoteControl extends ThreadComponent {
                 // App is not available: storing command
                 else {
                     storedcommand = command;
-                    informManager("application_need_attention");
+                    mail("application_need_attention").to(Manager.class).send();
                 }
                 LOCK.unlock();
             }
@@ -177,27 +186,28 @@ public class RemoteControl extends ThreadComponent {
     @Override
     protected void close() {
         // exit sockets
-        manager.close();
         remotePublisher.close();
         context.term();
         Log.d("jdj-RemoteControl", "-- RemoteControl stopped");
     }
 
-    public void informManager(String msg) {
-        Intent mIntent = new Intent(appContext, Manager.class);
-        mIntent.putExtra("RemoteControl", msg);
-        appContext.startService(mIntent);
-    }
 
     public void onHello(JSONObject obj) {
         Log.d("RC-client", "WS hello: " + obj.toString());
         try {
             // CHECK Version
             if (obj.getJSONObject("version").getInt("major") > appContext.getResources().getInteger(R.integer.VERSION_MAJOR))
-                informManager("version_major_outdated");
+                mail("version_major_outdated").to(Manager.class).send();
 
             if (obj.getJSONObject("version").getInt("minor") > appContext.getResources().getInteger(R.integer.VERSION_MINOR))
-                informManager("version_minor_outdated");
+                mail("version_minor_outdated").to(Manager.class).send();
+
+            // Check NEXT SHOW
+            Long deltaTime = obj.getLong("nextshow") - System.currentTimeMillis();
+            Log.d("RC-client", "Delta Next show: NOW: "+System.currentTimeMillis()+" SHOW: "+obj.getLong("nextshow")+" DELTA: "+deltaTime);
+            if (deltaTime < 0) mail("update_state").to(Manager.class).add("state", Manager.STATE_SHOWPAST).send();
+            else if (deltaTime < 24*60*60*1000) mail("update_state").to(Manager.class).add("state", Manager.STATE_SHOWTIME).send();
+            else mail("update_state").to(Manager.class).add("state", Manager.STATE_SHOWFUTURE).send();
 
             // PARSE LVC
             if (obj.has("lvc")) {
@@ -234,35 +244,16 @@ public class RemoteControl extends ThreadComponent {
 
             if (command.has("action")) {
 
-                // STOP ANYWAY: GO BACK TO WELCOME PAGE
-                Intent cmdIntent = new Intent(appContext, WelcomeActivity.class);
-                cmdIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                cmdIntent.putExtra("action", command.getString("action"));
-                appContext.startActivity(cmdIntent);
+                Mailbox msg = mail("command").to(Manager.class)
+                        .add("controller", "remote")
+                        .add("action", command.getString("action"));
 
-                // ACTION: LAUNCH NEW PLAYER
-                if (command.has("category"))
-                {
-                    String cat = command.getString("category");
-                    if (cat.equals("url"))
-                        cmdIntent = new Intent(appContext, WebActivity.class);
-                    else if (cat.equals("video"))
-                        cmdIntent = new Intent(appContext, VideoActivity.class);
-                    else if (cat.equals("audio"))
-                        cmdIntent = new Intent(appContext, AudioActivity.class);
+                if (command.has("category")) msg.add("type", command.getString("category"));
+                if (command.has("url")) msg.add("url", command.getString("url"));
 
-                    cmdIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    cmdIntent.putExtra("action", command.getString("action"));
+                // TODO: SEARCH FOR LOCAL FILE / HLS / STREAM
 
-                    // TODO CHECK IF LOCAL FILE EXIST !
-                    if (command.has("url")) {
-                        cmdIntent.putExtra("mode", "remote");
-                        cmdIntent.putExtra("url", command.getString("url"));
-                    }
-
-                    appContext.startActivity(cmdIntent);
-                }
-
+                msg.send();
             }
             else Log.d("RC-client", "action missing ");
         }

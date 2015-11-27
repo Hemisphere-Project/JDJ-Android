@@ -28,12 +28,4 @@ public class AudioActivity extends MediaActivity {
         onNewIntent(getIntent());
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // Set Manager Mode
-        manager.setMode(Manager.MODE_PLAY);
-    }
-
 }

@@ -23,55 +23,20 @@ PREPARED ACTIVITY WHICH AUTO BIND/UNBIND TO THE MAIN MANAGER SERVICE
  */
 public class ManagedActivity extends Activity {
 
-    // Connector
-    public class ManagerConnector {
+    protected static Class myClass = ManagedActivity.class;
+    protected int MODE = Manager.MODE_STANDBY;
 
-        public Manager service;
-
-        protected int MODE = Manager.MODE_STANDBY;
-
-        private boolean mIsBound = false;
-
-        private ServiceConnection mConnection = new ServiceConnection() {
-            public void onServiceConnected(ComponentName className, IBinder remote_service) {
-                service = ((Manager.LocalBinder)remote_service).getService();
-                service.setMode(MODE);
-            }
-
-            public void onServiceDisconnected(ComponentName className) {
-                service = null;
-            }
-        };
-
-        public void connect(Context ctx) {
-            Log.v("jdj-ManagedActivity", "Activity connecting to manager with mode: " + MODE);
-            Intent intent = new Intent(ctx, Manager.class);
-            //intent.putExtra("MODE", MODE);
-            ctx.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-            mIsBound = true;
-        }
-
-        public void disconnect(Context ctx) {
-            if (mIsBound) {
-                // Detach our existing connection.
-                Log.v("jdj-ManagedActivity", "Activity disconnecting from manager");
-                ctx.unbindService(mConnection);
-                mIsBound = false;
-            }
-        }
-
-        public void setMode(int mode) {
-            MODE = mode;
-        }
-
-        public void stopApp() {
-            service.stopApp();
-        }
+    /*
+    MESSAGE SENDER
+     */
+    protected Mailbox mail(String msg) {
+        Mailbox mail = new Mailbox();
+        return mail.put(msg).from(this);
     }
 
-    // Manager connector link
-    protected ManagerConnector manager = new ManagerConnector();
-
+    /*
+    EXIT BROADCAST RECEIVER
+     */
     private final BroadcastReceiver exitsignal = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -79,21 +44,42 @@ public class ManagedActivity extends Activity {
         }
     };
 
+
+    /*
+    INTENT MESSAGE FORGE
+
+    public static messageToActivity Message(Context ctx, String msg) {
+        return new messageToActivity(ctx, msg);
+    }
+
+    public static class messageToActivity {
+        private Intent intent;
+        private Context context;
+        public messageToActivity(Context ctx, String msg) {
+            context = ctx;
+            intent = new Intent(context, myClass);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.putExtra("message", msg);
+        }
+        public void send() {
+            Log.e("CLASS", getClass().toString());
+            context.startActivity(intent);
+        }
+        public messageToActivity put(String key, int value) {
+            intent.putExtra(key, value);
+            return this;
+        }
+        public messageToActivity put(String key, String value) {
+            intent.putExtra(key, value);
+            return this;
+        }
+    }*/
+
+
     // Auto-start Manager if not already existing
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Start Manager if it does not exist already
-        ActivityManager aManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        boolean exist = false;
-        for (ActivityManager.RunningServiceInfo service : aManager.getRunningServices(Integer.MAX_VALUE))
-            if (service.service.getClassName().equals(Manager.class.getName())) exist = true;
-        if (!exist)  {
-            Log.v("jdj-ManagedActivity", "Starting Manager");
-            Manager.start(this);
-        }
-        //else Log.v("mgrlog", "Manager already started");
 
         // Subscribe to exit signal
         registerReceiver(exitsignal, new IntentFilter("exit_jdj"));
@@ -101,30 +87,26 @@ public class ManagedActivity extends Activity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
-    // Bind to Manager
+    // Connect Manager
     @Override
     protected void onStart() {
         super.onStart();
 
-        // Bind to Manager
-        manager.connect(this);
-    }
+        debug("Activity started");
 
-    // unBind to Manager
-    @Override
-    protected void onStop() {
-        super.onStop();
+        // Send Mode to Manager
+        mail("activity_connect").to(Manager.class).add("mode", MODE).send();
 
-        // unBind to Manager
-        manager.disconnect(this);
-
-        debug("Activity stopped");
     }
 
     // Fullscreen
     @Override
     protected void onResume() {
         super.onResume();
+
+        debug("Activity resumed");
+
+
         // Fullscreen
         if (Build.VERSION.SDK_INT>10) {
             // Hide both the navigation bar and the status bar.
@@ -138,6 +120,17 @@ public class ManagedActivity extends Activity {
             decorView.setSystemUiVisibility(uiOptions);
         }
     }
+
+    // unBind the Manager
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        // Send DISCONNECT to Manager
+        mail("activity_disconnect").to(Manager.class).send();
+    }
+
+
 
     @Override
     protected void onDestroy() {

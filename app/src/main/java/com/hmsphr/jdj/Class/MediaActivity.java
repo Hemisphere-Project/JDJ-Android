@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.hmsphr.jdj.Components.Players.PlayerCompat;
+import com.hmsphr.jdj.Services.Manager;
 
 /**
  * Created by mgr on 26/10/15.
@@ -20,17 +21,8 @@ public class MediaActivity extends ManagedActivity {
 
         // Check if player is available
         if (player != null) {
-            // Parse Intent
-            Bundle extras = intent.getExtras();
-            if (extras == null) {
-                error("Intent must provide extras");
-                return;
-            }
-            String action = extras.getString("action");
-            if (action == null) {
-                error("Intent must provide an action");
-                return;
-            }
+            String action = intent.getStringExtra("message");
+            String url = intent.getStringExtra("url");
 
             // Execute command
             // STOP
@@ -41,12 +33,17 @@ public class MediaActivity extends ManagedActivity {
 
             // PLAY
             else if (action.equals("play")) {
-                String url = extras.getString("url");
                 if (url == null) {error("Play action must provide an url");  return;}
                 player.load( url );
                 player.play();
             }
         }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        MODE = Manager.MODE_PLAY;
     }
 
     // Fullscreen
