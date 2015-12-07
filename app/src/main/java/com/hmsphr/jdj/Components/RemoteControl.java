@@ -166,7 +166,7 @@ public class RemoteControl extends ThreadComponent {
 
                 // App is not available: storing command
                 else {
-                    storedcommand = command;
+                    if (command.has("cache") && command.getBoolean("cache")) storedcommand = command;
                     mail("application_need_attention").to(Manager.class).send();
                 }
                 LOCK.unlock();
@@ -252,14 +252,18 @@ public class RemoteControl extends ThreadComponent {
 
             if (command.has("action")) {
 
-                Mailbox msg = mail("command").to(Manager.class)
-                        .add("controller", "remote")
-                        .add("action", command.getString("action"));
+                Mailbox msg = mail("command").to(Manager.class).add("controller", "remote");
 
-                // PLAYER ENGINE SELECTOR: web | audio | video
-                if (command.has("category")) msg.add("type", command.getString("category"));
+                // ACTION TO PERFORM
+                msg.add("action", command.getString("action"));
 
-                //if (command.has("url")) msg.add("url", command.getString("url"));
+                // PLAYER ENGINE SELECTOR: web | audio | video | phone
+                if (command.has("category")) msg.add("engine", command.getString("category"));
+                else msg.add("param1", "none");
+
+                // EXTRA PARAMETER
+                if (command.has("param1")) msg.add("param1", command.getString("param1"));
+                else msg.add("param1", "");
 
                 // FILE PATH SELECTOR (WORST TO BEST)
                 String filepath = null;

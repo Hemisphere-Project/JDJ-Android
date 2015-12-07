@@ -8,8 +8,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.hardware.Camera;
 import android.os.IBinder;
 import android.os.Binder;
+import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -48,6 +50,12 @@ public class Manager extends Service {
     public Manager() {
         Log.v("jdj-Manager", "Manager started.. ");
     }
+
+    /*
+    CAMERA
+     */
+    private Camera camera;
+    private boolean lightIsOn = false;
 
     /*
     MESSAGE SENDER
@@ -155,6 +163,9 @@ public class Manager extends Service {
             @Override
             public void run() { clearNotification(); }
         }, this.getResources().getInteger(R.integer.NOTIFICATION_TIMEOUT) * 1000);
+
+        // vibrate
+        vibrate(100);
     }
 
     public void clearNotification() {
@@ -180,6 +191,52 @@ public class Manager extends Service {
             if (UPDATE_INFO) mail("update_available").to(WelcomeActivity.class).send();
             UPDATE_INFO = false;
         }
+    }
+
+    /*
+    FLASHLIGHT
+     */
+    public void lightOn() {
+        if (!lightIsOn) {
+            try {
+                camera = Camera.open();
+                Camera.Parameters p = camera.getParameters();
+                p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+                camera.setParameters(p);
+                camera.startPreview();
+                lightIsOn = true;
+            } catch(Exception e) {
+                Log.e("Manager", "Camera ON error: "+e);}
+        }
+    }
+
+    public void lightOff() {
+        if (lightIsOn) {
+            try {
+                Camera.Parameters p = camera.getParameters();
+                p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+                camera.setParameters(p);
+                camera.stopPreview();
+                camera.release();
+                camera = null;
+                lightIsOn = false;
+            } catch(Exception e) {
+                Log.e("Manager", "Camera OFF error: "+e);}
+        }
+    }
+
+    /*
+    VIBRATION
+     */
+    public void vibrate(int ms) {
+        Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+        // Vibrate for 500 milliseconds
+        v.vibrate(ms);
+    }
+
+    public void lightToggle() {
+        if (!lightIsOn) lightOn();
+        else lightOff();
     }
 
     /*
@@ -219,21 +276,30 @@ public class Manager extends Service {
             else if (info.equals("command")) {
 
                 String action = intent.getStringExtra("action");
-                String type = intent.getStringExtra("type");
+                String engine = intent.getStringExtra("engine");
+                String param1 = intent.getStringExtra("param1");
 
                 // PLAY
                 if (action.equals("play"))
                 {
                     Mailbox msgPlay = mail("play");
-                    boolean valid = true;
+                    boolean sendToActivity = true;
 
-                    if (type.equals("web")) msgPlay.to(WebActivity.class);
-                    else if (type.equals("video")) msgPlay.to(VideoActivity.class);
-                    else if (type.equals("audio")) msgPlay.to(AudioActivity.class);
-                    else { Log.d("jdj-Manager", "No Player found for type: "+type); valid = false; }
+                    if (engine.equals("web")) msgPlay.to(WebActivity.class);
+                    else if (engine.equals("video")) msgPlay.to(VideoActivity.class);
+                    else if (engine.equals("audio")) msgPlay.to(AudioActivity.class);
+                    else if (engine.equals("phone")) {
+                        if (param1.equals("light")) lightToggle();
+                        else if (param1.equals("vibre")) vibrate(300);
+                        sendToActivity = false;
+                    }
+                    else {
+                        Log.d("jdj-Manager", "No Engine found for: "+engine);
+                        sendToActivity = false;
+                    }
 
-                    if (valid) {
-                        Log.d("jdj-Manager", "New command sent to: " + type);
+                    if (sendToActivity) {
+                        Log.d("jdj-Manager", "New command sent to: " + engine);
                         setMode(MODE_PLAY);
                         msgPlay.add("url", intent.getStringExtra("filepath")).send();
                     }
@@ -241,6 +307,7 @@ public class Manager extends Service {
                 // STOP
                 else if (action.equals("stop"))
                     mail("stop").to(WelcomeActivity.class).send();
+
 
             }
 
