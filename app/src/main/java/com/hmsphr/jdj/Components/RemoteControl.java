@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -25,6 +26,7 @@ import com.hmsphr.jdj.Services.Manager;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 
+import java.io.File;
 import java.net.URISyntaxException;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -153,7 +155,7 @@ public class RemoteControl extends ThreadComponent {
                 JSONObject command = new JSONObject(data);
 
                 // Log received instructions
-                Log.v("RC-client", "received JSON: " + data);
+                Log.d("RC-client", "received JSON: " + data);
 
                 LOCK.lock();
                 // App is available to execute now
@@ -202,18 +204,25 @@ public class RemoteControl extends ThreadComponent {
             if (obj.getJSONObject("version").getInt("minor") > appContext.getResources().getInteger(R.integer.VERSION_MINOR))
                 mail("version_minor_outdated").to(Manager.class).send();
 
-            // Check NEXT SHOW
+            // Check SHOW STATE
+            int showState = 0;
             Long deltaTime = obj.getLong("nextshow") - System.currentTimeMillis();
-            Log.d("RC-client", "Delta Next show: NOW: "+System.currentTimeMillis()+" SHOW: "+obj.getLong("nextshow")+" DELTA: "+deltaTime);
-            if (deltaTime < 0) mail("update_state").to(Manager.class).add("state", Manager.STATE_SHOWPAST).send();
-            else if (deltaTime < 24*60*60*1000) mail("update_state").to(Manager.class).add("state", Manager.STATE_SHOWTIME).send();
-            else mail("update_state").to(Manager.class).add("state", Manager.STATE_SHOWFUTURE).send();
+            Log.d("RC-client", "Delta Next show: NOW: " + System.currentTimeMillis() + " SHOW: " + obj.getLong("nextshow") + " DELTA: " + deltaTime);
+            if (deltaTime < 0) showState = Manager.STATE_SHOWPAST;
+            else if (deltaTime < 24*60*60*1000) showState = Manager.STATE_SHOWTIME;
+            else showState = Manager.STATE_SHOWFUTURE;
+            mail("update_state").to(Manager.class).add("state", showState).send();
 
             // PARSE LVC
             if (obj.has("lvc")) {
                 LOCK.lock();
                 storedcommand = new JSONObject(obj.getString("lvc"));
                 LOCK.unlock();
+            }
+
+            // DOWNLOAD AVAILABLE MEDIA
+            if (obj.has("medialist") && showState == Manager.STATE_SHOWFUTURE) {
+                // TODO: get media list and enqueue download tasks
             }
 
         }
@@ -224,7 +233,6 @@ public class RemoteControl extends ThreadComponent {
         //TODO
         // - check if file is available in local
         // - use atTime for synced play
-        // - dispatch with MODE
         // - use GROUP_PUB
 
         //Something is happening
@@ -248,10 +256,44 @@ public class RemoteControl extends ThreadComponent {
                         .add("controller", "remote")
                         .add("action", command.getString("action"));
 
+                // PLAYER ENGINE SELECTOR: web | audio | video
                 if (command.has("category")) msg.add("type", command.getString("category"));
-                if (command.has("url")) msg.add("url", command.getString("url"));
 
-                // TODO: SEARCH FOR LOCAL FILE / HLS / STREAM
+                //if (command.has("url")) msg.add("url", command.getString("url"));
+
+                // FILE PATH SELECTOR (WORST TO BEST)
+                String filepath = null;
+                int medialevel = 0;
+
+                // PROGRESSIVE STREAMING
+                if (command.has("url")) {
+                    filepath = command.getString("url");
+                    medialevel = 1;
+                }
+
+                // ADAPTATIVE STREAMING
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                    if (command.has("hls")) {
+                        filepath = command.getString("hls");
+                        medialevel = 2;
+                    }
+                }
+
+                // LOCAL FILE
+                if (command.has("filename")) {
+                    // TODO CHECK IF FILE AVAILABLE LOCALLY
+                    /*File media = getMediaFile(appContext, command.getString("filename"));
+                    if (media.exists()) {
+                        filepath = media.getPath();
+                        medialevel = 3;
+                    }*/
+                }
+
+                // ADD FILE
+                Log.d("RC-client", "media path: "+filepath+" level: "+medialevel);
+                msg.add("medialevel", medialevel);
+                msg.add("filepath", filepath);
+
 
                 msg.send();
             }
@@ -259,7 +301,6 @@ public class RemoteControl extends ThreadComponent {
         }
         catch (JSONException e) { Log.d("RC-client", "invalid JSON "); }
     }
-
 
 
 }

@@ -6,6 +6,8 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.IBinder;
 import android.os.Binder;
 import android.support.v4.app.NotificationCompat;
@@ -62,7 +64,6 @@ public class Manager extends Service {
     private int APP_MODE = 0;
     private int APP_STATE = 0;
 
-    public static final int MODE_STOP = -2;
     public static final int MODE_BROKEN = -1;
     public static final int MODE_STANDBY = 0;
     public static final int MODE_LOADING = 1;
@@ -80,7 +81,7 @@ public class Manager extends Service {
 
         if (APP_MODE == mode) return;
 
-        if (APP_MODE != MODE_BROKEN)
+        if (APP_MODE >= MODE_STANDBY)
         {
             APP_MODE = mode;
             remoteControl.setMode(APP_MODE);
@@ -134,11 +135,14 @@ public class Manager extends Service {
         // Notif Builder
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setSmallIcon(R.drawable.ic_notifsmall)
                         .setContentTitle("Il se passe quelque chose !")
                         .setContentText("Cliquez pour suivre l'aventure en direct..")
                         .setContentIntent(resultPendingIntent)
                         .setAutoCancel(true);
+
+        Bitmap bm = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+        mBuilder.setLargeIcon(bm);
 
         // Issue Notification
         NOTIF_ID=1;
@@ -231,7 +235,7 @@ public class Manager extends Service {
                     if (valid) {
                         Log.d("jdj-Manager", "New command sent to: " + type);
                         setMode(MODE_PLAY);
-                        msgPlay.add("url", intent.getStringExtra("url")).send();
+                        msgPlay.add("url", intent.getStringExtra("filepath")).send();
                     }
                 }
                 // STOP

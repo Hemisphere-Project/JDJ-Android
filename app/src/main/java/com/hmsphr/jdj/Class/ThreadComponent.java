@@ -22,10 +22,7 @@ abstract public class ThreadComponent {
 
     // START Thread action
     public void start() {
-        if (!isRunning()) {
-            RUN = true;
-            this.mThread.start();
-        }
+        if (!isRunning()) this.mThread.start();
     }
 
     // STOP Thread action
@@ -35,7 +32,7 @@ abstract public class ThreadComponent {
             try {
                 this.mThread.join(300); // wait for subscriber to finish
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                //throw new RuntimeException(e);
             }
             if (this.mThread.isAlive()) this.mThread.interrupt(); // force subscriber to stop
         }
@@ -48,11 +45,13 @@ abstract public class ThreadComponent {
 
     // THREAD sequence
     private void action() {
+        RUN = true;
         init();
         while(!Thread.currentThread().isInterrupted() && RUN) {
             loop();
         }
         close();
+        RUN = false;
     }
 
     // THREAD init -> Override !
