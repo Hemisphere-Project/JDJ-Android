@@ -1,22 +1,16 @@
 package com.hmsphr.jdj.Activities;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 
-import com.hmsphr.jdj.Class.Mailbox;
 import com.hmsphr.jdj.Class.ManagedActivity;
 import com.hmsphr.jdj.R;
 import com.hmsphr.jdj.Services.Manager;
-
-import java.util.Iterator;
-import java.util.Set;
 
 public class WelcomeActivity extends ManagedActivity {
 
@@ -25,7 +19,7 @@ public class WelcomeActivity extends ManagedActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_welcome);
+        setContentView(R.layout.view_welcome);
 
         MODE = Manager.MODE_WELCOME;
     }
@@ -92,32 +86,32 @@ public class WelcomeActivity extends ManagedActivity {
 
     void updateState(int State) {
 
-        TextView title = (TextView) findViewById(R.id.welcomeTitle);
+        //TextView title = (TextView) findViewById(R.id.welcomeTitle);
         TextView text = (TextView) findViewById(R.id.welcomeText);
 
         if (State == Manager.STATE_INIT) {
-            title.setText("Bienvenue !");
-            text.setText("Connection au serveur de Spectacle en cours..");
+            //title.setText("Bienvenue !");
+            text.setText("Bienvenue !\n\nConnection au serveur \nde Spectacle en cours..");
         }
         else if (State == Manager.STATE_NONET) {
-            title.setText("Aucune connexion au réseau..");
-            text.setText("Vérifiez que vous êtes connecté à internet via Wifi ou 3G/4G !");
+            //title.setText("Aucune connexion au réseau..");
+            text.setText("Aucune connexion au réseau..\n\nVérifiez que vous êtes connecté à internet\nvia Wifi ou 3G/4G !");
         }
         else if (State == Manager.STATE_SHOWPAST) {
-            title.setText("Le spectacle est terminé..");
-            text.setText("Merci de nous avoir suivi ! Et à bientôt pour de nouvelles aventures...");
+            //title.setText("Le spectacle est terminé..");
+            text.setText("Le spectacle est terminé..\n\nMerci de nous avoir suivi ! Et à bientôt pour de nouvelles aventures...");
         }
         else if (State == Manager.STATE_SHOWFUTURE) {
-            title.setText("Le spectacle commencera bientôt !");
-            text.setText("Vous serez alerté en direct des évènements à venir..");
+            //title.setText("Le spectacle commencera bientôt !");
+            text.setText("Le spectacle commencera bientôt !\n\nVous serez alerté en direct des évènements à venir..");
         }
         else if (State == Manager.STATE_SHOWTIME) {
-            title.setText("Bienvenue !");
-            text.setText("Le spectacle est en cours, restez connecté !");
+            //title.setText("Bienvenue !");
+            text.setText("Bienvenue\n\nLe spectacle est en cours,\nrestez connecté ! ");
         }
         else {
-            title.setText("Bienvenue !");
-            text.setText("");
+            //title.setText("Bienvenue !");
+            text.setText("Bienvenue !");
         }
     }
 

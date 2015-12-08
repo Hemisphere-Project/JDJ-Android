@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="VERSION_MAJOR">0</integer>
-    <integer name="VERSION_MINOR">2</integer>
 
     <integer name="APP_TIMEOUT_NOACTIVITY">1440</integer> <!-- Minutes -->
     <integer name="NOTIFICATION_TIMEOUT">30</integer> <!-- Seconds -->

@@ -177,6 +177,7 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
 
         // LOOP
         if (playbackState == ExoPlayer.STATE_ENDED) player.seekTo(0);
+        //if (playbackState == ExoPlayer.STATE_ENDED) player.didEnd();
 
         String text = "playWhenReady=" + playWhenReady + ", playbackState=";
         switch(playbackState) {

@@ -15,7 +15,6 @@ import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.hmsphr.jdj.Activities.AudioActivity;
 import com.hmsphr.jdj.Activities.VideoActivity;
 import com.hmsphr.jdj.Activities.WebActivity;
 import com.hmsphr.jdj.Activities.WelcomeActivity;
@@ -286,8 +285,8 @@ public class Manager extends Service {
                     boolean sendToActivity = true;
 
                     if (engine.equals("web")) msgPlay.to(WebActivity.class);
-                    else if (engine.equals("video")) msgPlay.to(VideoActivity.class);
-                    else if (engine.equals("audio")) msgPlay.to(AudioActivity.class);
+                    else if (engine.equals("video")) msgPlay.to(VideoActivity.class).add("mode", "video");
+                    else if (engine.equals("audio")) msgPlay.to(VideoActivity.class).add("mode", "audio");
                     else if (engine.equals("phone")) {
                         if (param1.equals("light")) lightToggle();
                         else if (param1.equals("vibre")) vibrate(300);

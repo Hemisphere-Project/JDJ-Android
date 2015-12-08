@@ -28,15 +28,16 @@
             android:layout_height="match_parent"
             android:background="@android:color/black"/>
 
-    </com.google.android.exoplayer.AspectRatioFrameLayout>
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/audioShutter"
+            android:visibility="gone"
+            android:src="@drawable/lyle_owerko2"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:background="@color/pitch_black" />
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/audioShutter"
-        android:src="@drawable/lyle_owerko2"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:background="@color/pitch_black" />
+    </com.google.android.exoplayer.AspectRatioFrameLayout>
 
 </RelativeLayout>

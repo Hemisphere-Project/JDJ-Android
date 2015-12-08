@@ -61,23 +61,25 @@ public class WebPlayer implements PlayerCompat {
     {
         //myWebView.clearCache(true);
         myWebView.loadUrl(contentUri);
-        resume();
-    }
-
-    public void resume()
-    {
         myWebView.setVisibility(View.VISIBLE);
         context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
-    public void pause()
-    {
-        // Do nothing
-    }
-
     public void stop() {
         hide();
-        myWebView.loadUrl("about:blank");
+        //myWebView.loadUrl("about:blank");
+        myWebView.loadDataWithBaseURL(null, "<html><head></head><body bgcolor=\"black\"></body></html>", "text/html", "utf-8", null);
+    }
+
+
+    public void resume()
+    {
+        play();
+    }
+
+    public void pause()
+    {
+        stop();
     }
 
     public void hide() {

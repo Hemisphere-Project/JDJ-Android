@@ -11,7 +11,6 @@ import com.hmsphr.jdj.Class.MediaActivity;
 import com.hmsphr.jdj.Components.Players.MediaPlayerClassic;
 import com.hmsphr.jdj.Components.Players.MediaPlayerExo;
 import com.hmsphr.jdj.R;
-import com.hmsphr.jdj.Services.Manager;
 
 public class VideoActivity extends MediaActivity {
 
@@ -23,7 +22,7 @@ public class VideoActivity extends MediaActivity {
         if (currentapiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN)
         {
             // Configure HLS movie player
-            setContentView(R.layout.activity_exo);
+            setContentView(R.layout.view_exoplayer);
             player = new MediaPlayerExo(this, (AspectRatioFrameLayout) findViewById(R.id.playerVIDEO),
                     (SurfaceView) findViewById(R.id.playerVIDEO_surface),
                     (View) findViewById(R.id.playerVIDEO_shutter),
@@ -34,7 +33,7 @@ public class VideoActivity extends MediaActivity {
         else
         {
             // Configure Classic MediaPlayer
-            setContentView(R.layout.activity_video);
+            setContentView(R.layout.view_classicplayer);
             player = new MediaPlayerClassic(this, (VideoView) findViewById(R.id.videoView));
 
             info("ClassicPlayer started");

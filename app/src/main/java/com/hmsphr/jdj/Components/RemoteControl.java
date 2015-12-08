@@ -4,20 +4,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.zeromq.ZMQ;
 
-import android.app.Service;
 import android.content.Context;
-import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
 
 import com.github.nkzawa.emitter.Emitter;
-import com.hmsphr.jdj.Activities.AudioActivity;
-import com.hmsphr.jdj.Activities.VideoActivity;
-import com.hmsphr.jdj.Activities.WebActivity;
-import com.hmsphr.jdj.Activities.WelcomeActivity;
+import com.hmsphr.jdj.BuildConfig;
 import com.hmsphr.jdj.Class.Mailbox;
 import com.hmsphr.jdj.Class.ThreadComponent;
 import com.hmsphr.jdj.R;
@@ -26,7 +21,6 @@ import com.hmsphr.jdj.Services.Manager;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 
-import java.io.File;
 import java.net.URISyntaxException;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -198,11 +192,14 @@ public class RemoteControl extends ThreadComponent {
         Log.d("RC-client", "WS hello: " + obj.toString());
         try {
             // CHECK Version
-            if (obj.getJSONObject("version").getInt("major") > appContext.getResources().getInteger(R.integer.VERSION_MAJOR))
-                mail("version_major_outdated").to(Manager.class).send();
+            String[] version = BuildConfig.VERSION_NAME.split("\\.");
+            if (version.length >= 2) {
+                if (obj.getJSONObject("version").getInt("major") > Integer.parseInt(version[0]))
+                    mail("version_major_outdated").to(Manager.class).send();
 
-            if (obj.getJSONObject("version").getInt("minor") > appContext.getResources().getInteger(R.integer.VERSION_MINOR))
-                mail("version_minor_outdated").to(Manager.class).send();
+                if (obj.getJSONObject("version").getInt("minor") > Integer.parseInt(version[1]))
+                    mail("version_minor_outdated").to(Manager.class).send();
+            }
 
             // Check SHOW STATE
             int showState = 0;

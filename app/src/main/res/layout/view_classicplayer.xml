@@ -9,4 +9,15 @@
         android:layout_alignParentBottom="true"
         android:layout_height="fill_parent">
     </VideoView>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/audioShutter"
+        android:visibility="gone"
+        android:src="@drawable/lyle_owerko2"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:background="@color/pitch_black" />
+
 </RelativeLayout>
