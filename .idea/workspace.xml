@@ -42,24 +42,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a1994c83-2868-4aad-b969-a810679a3782" name="Default" comment="Re-factor + Welcome activity&#10;">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Activities/AudioActivity.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_exo.xml" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_audio.xml" afterPath="$PROJECT_DIR$/app/src/main/res/layout/view_exoplayer.xml" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_load.xml" afterPath="$PROJECT_DIR$/app/src/main/res/layout/view_splashscreen.xml" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_video.xml" afterPath="$PROJECT_DIR$/app/src/main/res/layout/view_classicplayer.xml" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_web.xml" afterPath="$PROJECT_DIR$/app/src/main/res/layout/view_webview.xml" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_welcome.xml" afterPath="$PROJECT_DIR$/app/src/main/res/layout/view_welcome.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Services/Manager.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Services/Manager.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Class/MediaActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Class/MediaActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Components/Players/MediaPlayerExo.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Components/Players/MediaPlayerExo.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Components/RemoteControl.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Components/RemoteControl.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Activities/VideoActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Activities/VideoActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Activities/WebActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Activities/WebActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Components/Players/WebPlayer.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Components/Players/WebPlayer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Activities/WelcomeActivity.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Activities/WelcomeActivity.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/build.gradle" afterPath="$PROJECT_DIR$/app/build.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/values/config.xml" afterPath="$PROJECT_DIR$/app/src/main/res/values/config.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="JDJ-Android.iws" />
@@ -88,10 +72,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="RemoteControl.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="RemoteControl.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Components/RemoteControl.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.53731346">
+            <state vertical-scroll-proportion="0.0">
               <caret line="201" column="13" selection-start-line="201" selection-start-column="13" selection-end-line="201" selection-end-column="13" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -112,35 +96,15 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="WebPlayer.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Components/Players/WebPlayer.java">
+      <file leaf-file-name="Manager.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Services/Manager.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="44" column="47" selection-start-line="44" selection-start-column="47" selection-end-line="44" selection-end-column="47" />
+            <state vertical-scroll-proportion="-11.935484">
+              <caret line="257" column="27" selection-start-line="257" selection-start-column="27" selection-end-line="257" selection-end-column="27" />
               <folding>
-                <element signature="e#1711#1712#0" expanded="true" />
-                <element signature="e#1743#1744#0" expanded="true" />
-                <element signature="e#2246#2247#0" expanded="true" />
-                <element signature="e#2268#2269#0" expanded="true" />
-                <element signature="e#2299#2300#0" expanded="true" />
-                <element signature="e#2321#2322#0" expanded="true" />
-                <element signature="e#2347#2348#0" expanded="true" />
-                <element signature="e#2397#2398#0" expanded="true" />
+                <element signature="imports" expanded="true" />
               </folding>
             </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="view_splashscreen.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/view_splashscreen.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-9.290322">
-              <caret line="16" column="17" selection-start-line="16" selection-start-column="17" selection-end-line="16" selection-end-column="17" />
-              <folding />
-            </state>
-          </provider>
-          <provider editor-type-id="android-designer">
-            <state />
           </provider>
         </entry>
       </file>
@@ -167,6 +131,16 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/build.gradle">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="MediaPlayerExo.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Components/Players/MediaPlayerExo.java">
           <provider selected="true" editor-type-id="text-editor">
@@ -187,11 +161,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="false">
+      <file leaf-file-name="build.gradle" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-6.827586">
-              <caret line="11" column="24" selection-start-line="11" selection-start-column="24" selection-end-line="11" selection-end-column="24" />
+            <state vertical-scroll-proportion="0.4477612">
+              <caret line="15" column="31" selection-start-line="15" selection-start-column="31" selection-end-line="15" selection-end-column="31" />
               <folding />
             </state>
           </provider>
@@ -1352,7 +1326,7 @@
     </option>
     <option name="modificationStamps">
       <map>
-        <entry key="$PROJECT_DIR$" value="4334204918935" />
+        <entry key="$PROJECT_DIR$" value="4334206778252" />
       </map>
     </option>
     <option name="projectBuildClasspath">
@@ -1713,7 +1687,6 @@
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_audio.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Class/ThreadComponent.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Activities/AudioActivity.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Services/Manager.java" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_exo.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_video.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Activities/VideoActivity.java" />
@@ -1726,9 +1699,10 @@
         <option value="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Components/Players/PlayerCompat.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Components/Players/MediaPlayerExo.java" />
         <option value="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
-        <option value="$PROJECT_DIR$/app/build.gradle" />
         <option value="$PROJECT_DIR$/app/src/main/res/values/config.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Components/RemoteControl.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Services/Manager.java" />
+        <option value="$PROJECT_DIR$/app/build.gradle" />
       </list>
     </option>
   </component>
@@ -2521,14 +2495,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/view_exoplayer.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-10.32258">
@@ -2562,16 +2528,6 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="42" column="32" selection-start-line="42" selection-start-column="32" selection-end-line="42" selection-end-column="32" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Services/Manager.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="288" column="103" selection-start-line="288" selection-start-column="103" selection-end-line="288" selection-end-column="103" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -2672,14 +2628,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-6.827586">
-          <caret line="11" column="24" selection-start-line="11" selection-start-column="24" selection-end-line="11" selection-end-column="24" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/res/values/config.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -2690,11 +2638,37 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Components/RemoteControl.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.53731346">
+        <state vertical-scroll-proportion="0.0">
           <caret line="201" column="13" selection-start-line="201" selection-start-column="13" selection-end-line="201" selection-end-column="13" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/hmsphr/jdj/Services/Manager.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-11.935484">
+          <caret line="257" column="27" selection-start-line="257" selection-start-column="27" selection-end-line="257" selection-end-column="27" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.4477612">
+          <caret line="15" column="31" selection-start-line="15" selection-start-column="31" selection-end-line="15" selection-end-column="31" />
+          <folding />
         </state>
       </provider>
     </entry>

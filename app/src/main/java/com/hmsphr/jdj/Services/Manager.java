@@ -255,7 +255,7 @@ public class Manager extends Service {
         super.onStartCommand(intent, flags, startId);
 
         // Process intents
-        if (intent.hasExtra("message")) {
+        if (intent != null && intent.hasExtra("message")) {
             String info = intent.getStringExtra("message");
 
                 // ACTIVITY RESUMED
