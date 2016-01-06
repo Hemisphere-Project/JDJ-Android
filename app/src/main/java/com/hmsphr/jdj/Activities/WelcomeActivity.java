@@ -88,6 +88,7 @@ public class WelcomeActivity extends ManagedActivity {
 
         //TextView title = (TextView) findViewById(R.id.welcomeTitle);
         TextView text = (TextView) findViewById(R.id.welcomeText);
+        //Log.d("WelcomeActivity", "State: "+State);
 
         if (State == Manager.STATE_INIT) {
             //title.setText("Bienvenue !");
@@ -99,7 +100,8 @@ public class WelcomeActivity extends ManagedActivity {
         }
         else if (State == Manager.STATE_SHOWPAST) {
             //title.setText("Le spectacle est terminé..");
-            text.setText("Le spectacle est terminé..\n\nMerci de nous avoir suivi ! Et à bientôt pour de nouvelles aventures...");
+            text.setText("Le spectacle est terminé..\n\nMerci de nous avoir suivi !\n" +
+                    "A bientôt pour de nouvelles aventures...");
         }
         else if (State == Manager.STATE_SHOWFUTURE) {
             //title.setText("Le spectacle commencera bientôt !");
