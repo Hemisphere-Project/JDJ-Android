@@ -12,7 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:contentDescription="@string/player_video">
+        android:contentDescription="@string/player_video"
+        android:layout_centerInParent="true">
 
         <SurfaceView android:id="@+id/playerVIDEO_surface"
             android:layout_width="match_parent"
@@ -22,11 +23,6 @@
         <com.google.android.exoplayer.text.SubtitleLayout android:id="@+id/playerVIDEO_subtitles"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
-
-        <View android:id="@+id/playerVIDEO_shutter"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/black"/>
 
         <ImageView
             android:layout_width="match_parent"
@@ -39,5 +35,15 @@
             android:background="@color/pitch_black" />
 
     </com.google.android.exoplayer.AspectRatioFrameLayout>
+
+    <View android:id="@+id/playerVIDEO_shutter"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="false"
+        android:layout_centerInParent="true" />
 
 </RelativeLayout>
