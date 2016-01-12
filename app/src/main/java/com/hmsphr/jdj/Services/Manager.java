@@ -326,7 +326,7 @@ public class Manager extends Service {
             else if (info.equals("version_minor_outdated")) advertiseUpdate();
 
             // UPDATE STATE
-            else if (info.equals("update_state"))  setState(intent.getIntExtra("state", STATE_INIT));
+            else if (info.equals("update_state")) setState(intent.getIntExtra("state", STATE_INIT));
 
         }
 

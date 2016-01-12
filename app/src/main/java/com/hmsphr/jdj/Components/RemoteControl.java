@@ -61,8 +61,8 @@ public class RemoteControl extends ThreadComponent {
 
     // STATE
     private void setState(int state) {
+        if (state != STATE) mail("update_state").to(Manager.class).add("state", state).send();
         STATE = state;
-        if (MODE >= Manager.MODE_WELCOME) mail("update_state").to(WelcomeActivity.class).add("state", STATE).send();
     }
 
     // CHECK NETWORK AVAILABILITY
@@ -256,7 +256,7 @@ public class RemoteControl extends ThreadComponent {
             if (deltaTime < 0) showState = Manager.STATE_SHOWPAST;
             else if (deltaTime < 24*60*60*1000) showState = Manager.STATE_SHOWTIME;
             else showState = Manager.STATE_SHOWFUTURE;
-            mail("update_state").to(Manager.class).add("state", showState).send();
+            setState(showState);
 
             // PARSE LVC
             if (obj.has("lvc"))
