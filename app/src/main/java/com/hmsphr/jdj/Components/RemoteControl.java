@@ -83,7 +83,7 @@ public class RemoteControl extends ThreadComponent {
         try {
             mSocket = IO.socket(String.format("http://%s:%d",
                     appContext.getResources().getString(R.string.IP_PROXY),
-                    appContext.getResources().getInteger(R.integer.PORT_INFO)));
+                    appContext.getResources().getInteger(R.integer.PORT_CMD)));
         } catch (URISyntaxException e) {}
 
         // ON CONNECT
