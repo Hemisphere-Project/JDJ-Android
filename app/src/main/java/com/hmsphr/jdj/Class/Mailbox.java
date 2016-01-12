@@ -39,6 +39,10 @@ public class Mailbox {
         intent.putExtra(key, value);
         return this;
     }
+    public Mailbox add(String key, boolean value) {
+        intent.putExtra(key, value);
+        return this;
+    }
     public void send() {
         Log.d("Mailbox", "Message posted from: "+context.getClass().toString()+" To: " + destination.getSuperclass());
         if (isActivity()) context.startActivity(intent);

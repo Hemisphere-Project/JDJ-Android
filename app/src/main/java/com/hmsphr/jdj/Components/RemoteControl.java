@@ -12,6 +12,7 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.github.nkzawa.emitter.Emitter;
+import com.hmsphr.jdj.Activities.WelcomeActivity;
 import com.hmsphr.jdj.BuildConfig;
 import com.hmsphr.jdj.Class.Mailbox;
 import com.hmsphr.jdj.Class.ThreadComponent;
@@ -27,11 +28,10 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class RemoteControl extends ThreadComponent {
 
-    private long APP_TIMEOUT = 24*60*60*1000;
+    private long APP_TIMEOUT = 24*60*60*1000;  //Default value: 24H
     private long lastactivity = 0;
 
     private int MODE = 0; // dispatch flag between player and notifier
-    private Context appContext;
 
     private ZMQ.Context context = ZMQ.context(1);
     private ZMQ.Socket remotePublisher = context.socket(ZMQ.SUB);
@@ -41,28 +41,31 @@ public class RemoteControl extends ThreadComponent {
     private ReentrantLock LOCK = new ReentrantLock();
 
     private String data;
-    private int laststamp = 0;
-    private JSONObject storedcommand = null;
+    private int last_stamp = 0;
+    private JSONObject cmd_buffer = null;
 
     private boolean CONNECTED = false;
+    private boolean CONNECTING = false;
+    private boolean PREPARED = false;
+    private int STATE = -1;
 
-
+    // CONSTRUCTOR
     public RemoteControl(Context ctx) {
-        appContext = ctx;
+        super(ctx);
     }
 
-    /*
-    MESSAGE SENDER
-     */
-    private Mailbox mail(String msg) {
-        Mailbox mail = new Mailbox();
-        return mail.put(msg).from(appContext);
-    }
-
+    // MODE
     public void setMode(int mode) {
         MODE = mode;
     }
 
+    // STATE
+    private void setState(int state) {
+        STATE = state;
+        if (MODE >= Manager.MODE_WELCOME) mail("update_state").to(WelcomeActivity.class).add("state", STATE).send();
+    }
+
+    // CHECK NETWORK AVAILABILITY
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -70,41 +73,107 @@ public class RemoteControl extends ThreadComponent {
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    private void connect() {
+    // PREPARE THE SOCKET FOR CONNECTION
+    // and Bind events
+    private void prepare() {
 
-        // No Network available
-        if (!isNetworkAvailable()) return;
+        if (PREPARED) return;
 
-        // Already connected
-        if (CONNECTED) return;
-
-        // connect to proxy websocket
-        Log.d("RC-client", "Connecting info WebSocket");
+        // Configure WebSocket
         try {
             mSocket = IO.socket(String.format("http://%s:%d",
                     appContext.getResources().getString(R.string.IP_PROXY),
                     appContext.getResources().getInteger(R.integer.PORT_INFO)));
         } catch (URISyntaxException e) {}
 
-        mSocket.on("hello", new Emitter.Listener() {
+        // ON CONNECT
+        mSocket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                CONNECTED = true;
+                Log.d("RC-client", "Connected !");
+            }
+
+        })
+
+        // ON HELLO
+        .on("hello", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 JSONObject obj = (JSONObject) args[0];
-                onHello(obj);
+                LOCK.lock();
+                processHello(obj);
+                LOCK.unlock();
             }
+
+        })
+
+        // ON COMMAND
+        .on("task", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject obj = (JSONObject) args[0];
+                LOCK.lock();
+                processCommand(obj);
+                LOCK.unlock();
+            }
+
+        })
+
+        // ON DISCONNECT
+        .on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                CONNECTED = false;
+                Log.d("RC-client", "Disconnected !");
+                setState(Manager.STATE_INIT);
+            }
+
         });
-        mSocket.connect();
+
+        PREPARED = true;
+    }
+
+    // START TRYING TO CONNECT
+    private void connect() {
+        if (!CONNECTING) {
+            setState(Manager.STATE_INIT);
+            mSocket.connect();
+            CONNECTING = true;
+        }
 
         // connect to proxy publisher
+        /*Log.d("RC-client", "Connecting zmq Publisher");
         remotePublisher.connect(String.format("tcp://%s:%d",
                 appContext.getResources().getString(R.string.IP_PROXY),
                 appContext.getResources().getInteger(R.integer.PORT_PUB)));
         remotePublisher.subscribe("".getBytes());
-        poller.register(remotePublisher, ZMQ.Poller.POLLIN);
-        CONNECTED = true;
-        Log.d("RC-client", "Connected !");
+        poller.register(remotePublisher, ZMQ.Poller.POLLIN);*/
 
     }
+
+    // DISCONNECT && STOP TRYING TO CONNECT
+    private void disconnect() {
+        if (CONNECTING) {
+            mSocket.disconnect();
+            CONNECTING = false;
+        }
+    }
+
+    // Re-Try CONNECT while not successful
+    private void checkConnect() {
+        if (!CONNECTED) {
+            disconnect();
+            connect();
+        }
+    }
+
+    private void tryBuffer() {
+        // APP now available: execute stored commands
+        if (cmd_buffer != null && MODE >= Manager.MODE_WELCOME)
+            processCommand(cmd_buffer);
+    }
+
 
     // CLIENT LOOP: LISTEN ZMQ MESSAGES
     @Override
@@ -112,84 +181,63 @@ public class RemoteControl extends ThreadComponent {
         Log.d("RC-client", "-- RemoteControl starting");
 
         SystemClock.sleep(1000);
-
-        // init lastactivity timestamp
         lastactivity = System.currentTimeMillis();
-
         APP_TIMEOUT = appContext.getResources().getInteger(R.integer.APP_TIMEOUT_NOACTIVITY)*60*1000;
+
+        prepare();
     }
 
     @Override
     protected void loop()
     {
         // EXIT IF NOTHING HAPPENS..
-        // TODO
         if (System.currentTimeMillis()-lastactivity > APP_TIMEOUT)
             mail("application_timeout").to(Manager.class).send();
 
-        // check if network is available
-        if (!isNetworkAvailable()) {
-            mail("update_state").to(Manager.class).add("state", Manager.STATE_NONET).send();
-            SystemClock.sleep(1000);
-            return;
+        // CHECK LINK AND BUFFER
+        if (isNetworkAvailable()) {
+            checkConnect();
+            tryBuffer();
         }
 
-        // re-connect if necessary
-        connect();
+        // NO NETWORK: wait disconnected
+        else {
+            disconnect();
+            setState(Manager.STATE_NONET);
+        }
+
+        // THREAD LOOP DO NOTHING: it should sleep
+        SystemClock.sleep(500);
 
         // Poll the subscriber stack
-        if(poller.poll(100) > 0) {
+        /*if(poller.poll(100) > 0) {
             //if (poller.pollin(0)) { // check on first Poll register
 
             data = remotePublisher.recvStr();
 
-            // Parse and execute order
-            try
-            {
-                JSONObject command = new JSONObject(data);
-
-                // Log received instructions
-                Log.d("RC-client", "received JSON: " + data);
-
-                LOCK.lock();
-                // App is available to execute now
-                if (MODE >= Manager.MODE_WELCOME) {
-                    processCommand(command);
-                    storedcommand = null;
-                }
-
-                // App is not available: storing command
-                else {
-                    if (command.has("cache") && command.getBoolean("cache")) storedcommand = command;
-                    mail("application_need_attention").to(Manager.class).send();
-                }
-                LOCK.unlock();
-            }
-            catch (JSONException e) { Log.d("RC-client", "invalid JSON: "+data); }
-
+            LOCK.lock();
+            processCommand(data);
+            LOCK.unlock();
         }
+        */
 
-        // APP now available: execute stored commands
-        LOCK.lock();
-        if (storedcommand != null && MODE >= Manager.MODE_WELCOME) {
-            processCommand(storedcommand);
-            storedcommand = null;
-            Log.d("RC-client", "Stored command processed ");
-        }
-        LOCK.unlock();
+
     }
 
     @Override
     protected void close() {
         // exit sockets
-        remotePublisher.close();
-        context.term();
+        //remotePublisher.close();
+        //context.term();
+
+        disconnect();
+        mSocket.close();
         Log.d("jdj-RemoteControl", "-- RemoteControl stopped");
     }
 
 
-    public void onHello(JSONObject obj) {
-        Log.d("RC-client", "WS hello: " + obj.toString());
+    public void processHello(JSONObject obj) {
+        Log.d("RC-client", "WS hello: " + obj);
         try {
             // CHECK Version
             String[] version = BuildConfig.VERSION_NAME.split("\\.");
@@ -211,11 +259,8 @@ public class RemoteControl extends ThreadComponent {
             mail("update_state").to(Manager.class).add("state", showState).send();
 
             // PARSE LVC
-            if (obj.has("lvc")) {
-                LOCK.lock();
-                storedcommand = new JSONObject(obj.getString("lvc"));
-                LOCK.unlock();
-            }
+            if (obj.has("lvc"))
+                cmd_buffer = obj.getJSONObject("lvc");
 
             // DOWNLOAD AVAILABLE MEDIA
             if (obj.has("medialist") && showState == Manager.STATE_SHOWFUTURE) {
@@ -226,40 +271,54 @@ public class RemoteControl extends ThreadComponent {
         catch (JSONException e) { Log.d("RC-client", "invalid JSON: "+e.toString()); }
     }
 
-    protected void processCommand(JSONObject command) {
+    protected void processCommand(JSONObject task) {
         //TODO
         // - check if file is available in local
         // - use atTime for synced play
         // - use GROUP_PUB
 
+        Log.d("RC-client", "WS task: " + task);
+
         //Something is happening
         lastactivity = System.currentTimeMillis();
 
-        try
-        {
-            // Check if command is a new one
-            if (command.has("timestamp")) {
-                int ts = command.getInt("timestamp");
-                if (ts <= laststamp) {
+        try {
+
+            //APP is not available
+            //
+            if (MODE < Manager.MODE_WELCOME) {
+                // Store command in Cache Buffer
+                if (task.has("cache") && task.getBoolean("cache")) cmd_buffer = task;
+                mail("application_need_attention").to(Manager.class).send();
+                return;
+            }
+
+            //APP is available: execute command now !
+            //
+            // Check if command has an expiration timestamp
+            if (task.has("timestamp")) {
+                int ts = task.getInt("timestamp");
+                if (ts <= last_stamp) {
                     Log.d("RC-client", "command already executed");
                     return;
                 }
-                else laststamp = ts;
+                else last_stamp = ts;
             }
 
-            if (command.has("action")) {
+            // Parse "action"
+            if (task.has("action")) {
 
                 Mailbox msg = mail("command").to(Manager.class).add("controller", "remote");
 
                 // ACTION TO PERFORM
-                msg.add("action", command.getString("action"));
+                msg.add("action", task.getString("action"));
 
                 // PLAYER ENGINE SELECTOR: web | audio | video | phone
-                if (command.has("category")) msg.add("engine", command.getString("category"));
+                if (task.has("category")) msg.add("engine", task.getString("category"));
                 else msg.add("param1", "none");
 
                 // EXTRA PARAMETER
-                if (command.has("param1")) msg.add("param1", command.getString("param1"));
+                if (task.has("param1")) msg.add("param1", task.getString("param1"));
                 else msg.add("param1", "");
 
                 // FILE PATH SELECTOR (WORST TO BEST)
@@ -267,21 +326,21 @@ public class RemoteControl extends ThreadComponent {
                 int medialevel = 0;
 
                 // PROGRESSIVE STREAMING
-                if (command.has("url")) {
-                    filepath = command.getString("url");
+                if (task.has("url")) {
+                    filepath = task.getString("url");
                     medialevel = 1;
                 }
 
                 // ADAPTATIVE STREAMING
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                    if (command.has("hls")) {
-                        filepath = command.getString("hls");
+                    if (task.has("hls")) {
+                        filepath = task.getString("hls");
                         medialevel = 2;
                     }
                 }
 
                 // LOCAL FILE
-                if (command.has("filename")) {
+                if (task.has("filename")) {
                     // TODO CHECK IF FILE AVAILABLE LOCALLY
                     /*File media = getMediaFile(appContext, command.getString("filename"));
                     if (media.exists()) {
@@ -299,8 +358,12 @@ public class RemoteControl extends ThreadComponent {
                 msg.send();
             }
             else Log.d("RC-client", "action missing ");
+
         }
         catch (JSONException e) { Log.d("RC-client", "invalid JSON "); }
+
+        //Empty command buffer
+        cmd_buffer = null;
     }
 
 

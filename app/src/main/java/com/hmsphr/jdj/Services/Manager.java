@@ -96,7 +96,7 @@ public class Manager extends Service {
             if (APP_MODE == MODE_WELCOME) remoteControl.start();
         }
 
-        if (APP_MODE == MODE_BROKEN) mail("broken_version").to(WelcomeActivity.class).send();
+        if (APP_MODE == MODE_BROKEN) mail("broken_version").to(WelcomeActivity.class).add("major", true).send();
 
         // LOG
         if (APP_MODE == MODE_STANDBY) Log.v("jdj-Manager", "Manager disconnected: STANDBY ");
@@ -187,7 +187,7 @@ public class Manager extends Service {
 
     public void advertiseUpdate() {
         if (APP_MODE == MODE_WELCOME) {
-            if (UPDATE_INFO) mail("update_available").to(WelcomeActivity.class).send();
+            if (UPDATE_INFO) mail("broken_version").to(WelcomeActivity.class).send();
             UPDATE_INFO = false;
         }
     }

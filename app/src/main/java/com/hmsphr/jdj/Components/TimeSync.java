@@ -31,15 +31,14 @@ public class TimeSync extends ThreadComponent {
     protected int validated;
     protected int leadingValuesToIgnore;
 
-    private Context appContext;
-
+    // CONSTRUCTOR
     public TimeSync(Context ctx) {
-        appContext = ctx;
+        super(ctx);
     }
 
     // return waiting time before reaching server timestamp
     public long timeTo(long timestamp) {
-        return (timestamp - Long.valueOf(timePool.getTimeMilliSynced()));
+        return (timestamp - timePool.getTimeMilliSynced());
     }
 
     protected void connect() {

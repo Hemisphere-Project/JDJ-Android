@@ -1,6 +1,7 @@
 package com.hmsphr.jdj.Class;
 
 
+import android.content.Context;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -8,9 +9,22 @@ import android.util.Log;
 PREPARED COMPONENT WITH THREADED ACTION
  */
 abstract public class ThreadComponent {
-    public ThreadComponent() {
+
+    // APP CONTEXT
+    protected Context appContext;
+
+    // CONSTRUCTOR
+    public ThreadComponent(Context ctx) {
+        appContext = ctx;
     }
 
+    // MESSAGE SENDER
+    protected Mailbox mail(String msg) {
+        Mailbox mail = new Mailbox();
+        return mail.put(msg).from(appContext);
+    }
+
+    // THREAD TOOLS
     protected Boolean RUN = false;
     private Thread mThread = new Thread() {
         @Override
@@ -18,7 +32,6 @@ abstract public class ThreadComponent {
             action();
         }
     };
-
 
     // START Thread action
     public void start() {

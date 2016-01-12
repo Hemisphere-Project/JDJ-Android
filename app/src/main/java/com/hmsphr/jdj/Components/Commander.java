@@ -1,5 +1,6 @@
 package com.hmsphr.jdj.Components;
 
+import android.content.Context;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -15,6 +16,12 @@ public class Commander extends ThreadComponent {
     private ZMQ.Socket socket = context.socket(ZMQ.ROUTER);
     private ZMQ.Poller poller = new ZMQ.Poller(100);
 
+    // CONSTRUCTOR
+    public Commander(Context ctx) {
+        super(ctx);
+    }
+
+    // MODE
     public void setMode(int mode) {
         MODE = mode;
     }

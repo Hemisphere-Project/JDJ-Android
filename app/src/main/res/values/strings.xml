@@ -21,4 +21,22 @@
     <string name="off">[off]</string>
     <string name="on">[on]</string>
     <string name="failed">Playback failed</string>
+
+    <string name="welcome_connecting">Bienvenue !\n\nConnection au serveur\nde Spectacle en cours..</string>
+    <string name="welcome_nonetwork">Aucune connexion au réseau..\n\nVérifiez que vous êtes connecté à internet\nvia Wifi ou 3G/4G !</string>
+    <string name="welcome_showpast">Le spectacle est terminé..\n\nMerci de nous avoir suivi !\nA bientôt pour de nouvelles aventures...</string>
+    <string name="welcome_showfuture">Le spectacle commencera bientôt !\n\nVous serez alerté en direct des évènements à venir..</string>
+    <string name="welcome_showtime">Bienvenue\n\nLe spectacle est en cours,\nrestez connecté ! </string>
+
+
+    <string name="expired_title">Version expirée :\'(</string>
+    <string name="expired_text1">Vous utilisez une version de l\'application qui n\'est plus compatible avec le spectacle.</string>
+    <string name="expired_text2">Merci de mettre à jour votre application via Google Play ou en la réinstallant manuellement.</string>
+    <string name="expired_bye">A bientôt !</string>
+
+    <string name="updatable_title">Mise à jour disponible !</string>
+    <string name="updatable_text1">Une mise à jour est disponible pour l\'application.</string>
+    <string name="updatable_text2">Vous pouvez l\'appliquer depuis Google Play ou en la téléchargeant manuellement.</string>
+    <string name="updatable_bye">Bon spectacle !</string>
+
 </resources>
