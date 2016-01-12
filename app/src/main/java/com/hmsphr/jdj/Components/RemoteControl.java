@@ -168,6 +168,14 @@ public class RemoteControl extends ThreadComponent {
         }
     }
 
+    private void storeTask(JSONObject task) {
+        // Store command in Cache Buffer
+        try {
+            if (task.has("cache") && task.getBoolean("cache")) cmd_buffer = task;
+            mail("application_need_attention").to(Manager.class).send();
+        } catch (JSONException e) { Log.d("RC-client", "invalid JSON: "+e.toString()); }
+    }
+
     private void tryBuffer() {
         // APP now available: execute stored commands
         if (cmd_buffer != null && MODE >= Manager.MODE_WELCOME)
@@ -259,16 +267,14 @@ public class RemoteControl extends ThreadComponent {
             setState(showState);
 
             // PARSE LVC
-            if (obj.has("lvc"))
-                cmd_buffer = obj.getJSONObject("lvc");
+            if (obj.has("lvc")) storeTask(obj.getJSONObject("lvc"));
 
             // DOWNLOAD AVAILABLE MEDIA
             if (obj.has("medialist") && showState == Manager.STATE_SHOWFUTURE) {
                 // TODO: get media list and enqueue download tasks
             }
 
-        }
-        catch (JSONException e) { Log.d("RC-client", "invalid JSON: "+e.toString()); }
+        } catch (JSONException e) { Log.d("RC-client", "invalid JSON: "+e.toString()); }
     }
 
     protected void processCommand(JSONObject task) {
@@ -287,9 +293,7 @@ public class RemoteControl extends ThreadComponent {
             //APP is not available
             //
             if (MODE < Manager.MODE_WELCOME) {
-                // Store command in Cache Buffer
-                if (task.has("cache") && task.getBoolean("cache")) cmd_buffer = task;
-                mail("application_need_attention").to(Manager.class).send();
+                storeTask(task);
                 return;
             }
 
