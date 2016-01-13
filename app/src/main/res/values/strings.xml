@@ -38,5 +38,8 @@
     <string name="updatable_text1">Une mise à jour est disponible pour l\'application.</string>
     <string name="updatable_text2">Vous pouvez l\'appliquer depuis Google Play ou en la téléchargeant manuellement.</string>
     <string name="updatable_bye">Bon spectacle !</string>
+    <string name="audio_shutter">audio shutter</string>
+    <string name="replay_shutter">replay shutter</string>
+    <string name="replay">replay</string>
 
 </resources>

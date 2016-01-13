@@ -10,6 +10,9 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.accessibility.CaptioningManager;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import com.google.android.exoplayer.AspectRatioFrameLayout;
 import com.google.android.exoplayer.ExoPlayer;
@@ -34,7 +37,6 @@ import java.util.Map;
 public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.Listener,
         ExPlayer.Listener, ExPlayer.CaptionListener, ExPlayer.Id3MetadataListener {
 
-    private View shutterView;
     private AspectRatioFrameLayout videoFrame;
     private SurfaceView surfaceView;
     private SubtitleLayout subtitleLayout;
@@ -44,6 +46,13 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
     private long playerPosition;
     private EventLogger eventLogger;
     private boolean audioRegistered = false;
+
+    private ImageView audioShutter;
+
+    private FrameLayout replayShutter;
+    private FrameLayout replayOverlay;
+    private ImageButton replayBtn;
+    private boolean replayEnable = false;
 
     private Activity context;
     private AudioCapabilitiesReceiver audioCapabilitiesReceiver;
@@ -56,13 +65,49 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
     public static final int TYPE_OTHER = 3;
 
 
-    public MediaPlayerExo(Activity ctx, AspectRatioFrameLayout frameV, SurfaceView surfaceV, View shutterV, SubtitleLayout subsV ) {
+    public MediaPlayerExo(Activity ctx, AspectRatioFrameLayout frameV, SurfaceView surfaceV, SubtitleLayout subsV) {
         context = ctx;
         videoFrame = frameV;
         surfaceView = surfaceV;
-        shutterView = shutterV;
         subtitleLayout = subsV;
         audioCapabilitiesReceiver = new AudioCapabilitiesReceiver(context, this);
+    }
+
+    public void setAudioShutter(ImageView audioS) {
+        audioShutter = audioS;
+    }
+
+    public void showAudioShutter() {
+        if (audioShutter != null) audioShutter.setVisibility(View.VISIBLE);
+    }
+
+    public void hideAudioShutter() {
+        if (audioShutter != null) audioShutter.setVisibility(View.GONE);
+    }
+
+    public void setReplayMenu(FrameLayout replayV, FrameLayout replayO, ImageButton replayB) {
+        replayShutter = replayV;
+        replayOverlay = replayO;
+        replayBtn = replayB;
+
+        // Replay Shutter action
+        replayBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                play();
+            }
+        });
+
+        replayEnable = true;
+    }
+
+    public void enableReplay() {
+        if (replayShutter != null) replayEnable = true;
+    }
+
+    public void disableReplay() {
+        if (replayShutter != null) replayShutter.setVisibility(View.GONE);
+        replayEnable = false;
     }
 
     public void load(String url) {
@@ -74,6 +119,7 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
     public void play()
     {
         stop();
+        if (replayEnable) replayShutter.setVisibility(View.GONE);
         resume();
     }
 
@@ -170,14 +216,19 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
         }
     }
 
+    public void onPlaybackEnd() {
+        Log.i("jdj-MoviePlayer", ("Media did reach end "));
+        if (replayEnable) replayShutter.setVisibility(View.VISIBLE);
+    }
+
     // DemoPlayer.Listener implementation
 
     @Override
     public void onStateChanged(boolean playWhenReady, int playbackState) {
 
         // LOOP
-        if (playbackState == ExoPlayer.STATE_ENDED) player.seekTo(0);
-        //if (playbackState == ExoPlayer.STATE_ENDED) player.didEnd();
+        //if (playbackState == ExoPlayer.STATE_ENDED) player.seekTo(0);
+        if (playbackState == ExoPlayer.STATE_ENDED) onPlaybackEnd();
 
         String text = "playWhenReady=" + playWhenReady + ", playbackState=";
         switch(playbackState) {
@@ -210,7 +261,6 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
 
     @Override
     public void onVideoSizeChanged(int width, int height, float pixelWidthAspectRatio) {
-        shutterView.setVisibility(View.GONE);
         videoFrame.setAspectRatio(
                 height == 0 ? 1 : (width * pixelWidthAspectRatio) / height);
     }

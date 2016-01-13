@@ -53,4 +53,63 @@
 
     </LinearLayout>
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:id="@+id/dialogBox"
+        android:visibility="visible">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.6"
+            android:background="@android:color/black"
+            android:id="@+id/dialogOverlay">
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/dialogbox"
+            android:layout_gravity="center"
+            android:layout_centerInParent="true"
+            android:padding="10dp"
+            android:weightSum="1"
+            android:layout_marginLeft="100dp"
+            android:layout_marginRight="100dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Title"
+                android:id="@+id/dialogTitle"
+                android:layout_marginBottom="10dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="Text 1"
+                android:id="@+id/dialogText"
+                android:layout_marginBottom="10dp" />
+
+            <Button
+                android:layout_width="31dp"
+                android:layout_height="27dp"
+                android:text="OK"
+                android:id="@+id/dialogOK"
+                android:background="@android:color/black"
+                android:textColor="@android:color/white"
+                android:layout_gravity="right"
+                android:textAlignment="center"
+                android:layout_marginTop="20dp" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
 </RelativeLayout>

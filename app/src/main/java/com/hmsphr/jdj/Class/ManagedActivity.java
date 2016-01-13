@@ -45,35 +45,6 @@ public class ManagedActivity extends Activity {
     };
 
 
-    /*
-    INTENT MESSAGE FORGE
-
-    public static messageToActivity Message(Context ctx, String msg) {
-        return new messageToActivity(ctx, msg);
-    }
-
-    public static class messageToActivity {
-        private Intent intent;
-        private Context context;
-        public messageToActivity(Context ctx, String msg) {
-            context = ctx;
-            intent = new Intent(context, myClass);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.putExtra("message", msg);
-        }
-        public void send() {
-            Log.e("CLASS", getClass().toString());
-            context.startActivity(intent);
-        }
-        public messageToActivity put(String key, int value) {
-            intent.putExtra(key, value);
-            return this;
-        }
-        public messageToActivity put(String key, String value) {
-            intent.putExtra(key, value);
-            return this;
-        }
-    }*/
 
 
     // Auto-start Manager if not already existing

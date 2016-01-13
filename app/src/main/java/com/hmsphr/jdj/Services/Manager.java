@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.os.Binder;
 import android.os.Vibrator;
@@ -55,6 +57,7 @@ public class Manager extends Service {
      */
     private Camera camera;
     private boolean lightIsOn = false;
+    private Timer lightStrober;
 
     /*
     MESSAGE SENDER
@@ -107,7 +110,7 @@ public class Manager extends Service {
         APP_STATE = state;
         Log.d("jdj-Manager", "Manager STATE: " + APP_STATE);
 
-        if (APP_MODE == MODE_WELCOME)
+        if ((APP_MODE == MODE_WELCOME) || (APP_MODE > MODE_WELCOME && APP_STATE < STATE_SHOWPAST))
             mail("update_state").to(WelcomeActivity.class).add("state", APP_STATE).send();
     }
 
@@ -126,6 +129,7 @@ public class Manager extends Service {
      */
     private int NOTIF_ID = 0;
     private Timer notifCancelTimer = null;
+    private MediaPlayer notifSound;
 
     public void notifyEvent() {
 
@@ -163,8 +167,12 @@ public class Manager extends Service {
             public void run() { clearNotification(); }
         }, this.getResources().getInteger(R.integer.NOTIFICATION_TIMEOUT) * 1000);
 
-        // vibrate
-        vibrate(100);
+        // vibrate + sound
+        vibrate(200);
+
+        notifSound = MediaPlayer.create(this, R.raw.notifsound1);
+        notifSound.start();
+
     }
 
     public void clearNotification() {
@@ -195,10 +203,10 @@ public class Manager extends Service {
     /*
     FLASHLIGHT
      */
-    public void lightOn() {
+    private void lightSwitchOn() {
         if (!lightIsOn) {
             try {
-                camera = Camera.open();
+                if (camera == null) camera = Camera.open();
                 Camera.Parameters p = camera.getParameters();
                 p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
                 camera.setParameters(p);
@@ -209,9 +217,10 @@ public class Manager extends Service {
         }
     }
 
-    public void lightOff() {
+    private void lightSwitchOff() {
         if (lightIsOn) {
             try {
+                if (camera == null) camera = Camera.open();
                 Camera.Parameters p = camera.getParameters();
                 p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
                 camera.setParameters(p);
@@ -224,6 +233,38 @@ public class Manager extends Service {
         }
     }
 
+    public void lightOn() {
+        lightStrobeStop();
+        lightSwitchOn();
+    }
+
+    public void lightOff() {
+        lightStrobeStop();
+        lightSwitchOff();
+    }
+
+    public void lightToggle() {
+        if (!lightIsOn) lightSwitchOn();
+        else lightSwitchOff();
+    }
+
+    public void lightStrobeStart() {
+        lightStrober = new Timer();
+        lightStrober.scheduleAtFixedRate(new TimerTask(){
+            @Override
+            public void run(){
+                lightToggle();
+            }
+        },0,500);
+    }
+
+    public void lightStrobeStop() {
+        if (lightStrober != null) {
+            lightStrober.cancel();
+            lightStrober = null;
+        }
+    }
+
     /*
     VIBRATION
      */
@@ -231,11 +272,6 @@ public class Manager extends Service {
         Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
         // Vibrate for 500 milliseconds
         v.vibrate(ms);
-    }
-
-    public void lightToggle() {
-        if (!lightIsOn) lightOn();
-        else lightOff();
     }
 
     /*
@@ -248,6 +284,10 @@ public class Manager extends Service {
 
         //commander.start();
         clock.start();
+
+        // Set Volume to 80%
+        final AudioManager mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)*8/10, 0);
     }
 
     @Override
@@ -287,8 +327,11 @@ public class Manager extends Service {
                     if (engine.equals("web")) msgPlay.to(WebActivity.class);
                     else if (engine.equals("video")) msgPlay.to(VideoActivity.class).add("mode", "video");
                     else if (engine.equals("audio")) msgPlay.to(VideoActivity.class).add("mode", "audio");
-                    else if (engine.equals("phone")) {
-                        if (param1.equals("light")) lightToggle();
+                    else if (engine.equals("phone"))
+                    {
+                        if (param1.equals("lightOn")) lightOn();
+                        else if (param1.equals("lightOff")) lightOff();
+                        else if (param1.equals("lightStrobe")) lightStrobeStart();
                         else if (param1.equals("vibre")) vibrate(300);
                         sendToActivity = false;
                     }
@@ -304,8 +347,10 @@ public class Manager extends Service {
                     }
                 }
                 // STOP
-                else if (action.equals("stop"))
+                else if (action.equals("stop")) {
                     mail("stop").to(WelcomeActivity.class).send();
+                    lightOff();
+                }
 
 
             }
@@ -314,7 +359,10 @@ public class Manager extends Service {
             else if (info.equals("application_timeout") || info.equals("application_stop")) stopApp();
 
                 // DISPLAY NOTIFICATION
-            else if (info.equals("application_need_attention")) notifyEvent();
+            else if (info.equals("application_need_attention")) {
+                clearNotification();
+                if (intent.getStringExtra("action").equals("play")) notifyEvent();
+            }
 
                 // DISPLAY NOTIFICATION
             else if (info.equals("application_standby")) clearNotification();

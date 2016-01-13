@@ -8,42 +8,58 @@
     tools:context="com.hmsphr.jdj.Activities.VideoActivity"
     android:background="#000000">
 
-    <com.google.android.exoplayer.AspectRatioFrameLayout android:id="@+id/playerVIDEO"
+    <com.google.android.exoplayer.AspectRatioFrameLayout android:id="@+id/videoView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:contentDescription="@string/player_video"
         android:layout_centerInParent="true">
 
-        <SurfaceView android:id="@+id/playerVIDEO_surface"
+        <SurfaceView android:id="@+id/videoSurface"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"/>
 
-        <com.google.android.exoplayer.text.SubtitleLayout android:id="@+id/playerVIDEO_subtitles"
+        <com.google.android.exoplayer.text.SubtitleLayout android:id="@+id/subtitlesView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/audioShutter"
-            android:visibility="gone"
-            android:src="@drawable/lyle_owerko2"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
-            android:background="@color/pitch_black" />
-
     </com.google.android.exoplayer.AspectRatioFrameLayout>
 
-    <View android:id="@+id/playerVIDEO_shutter"
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/black"
-        android:layout_alignParentTop="false"
-        android:layout_alignParentLeft="false"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="false"
-        android:layout_centerInParent="true" />
+        android:id="@+id/audioShutter"
+        android:visibility="gone"
+        android:src="@drawable/lyle_owerko2"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:background="@color/pitch_black"
+        android:contentDescription="@string/audio_shutter" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/replayShutter"
+        android:visibility="visible"
+        android:background="@android:color/transparent">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/black"
+            android:alpha="0.5"
+            android:id="@+id/replayOverlay"></FrameLayout>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/replayBtn"
+            android:layout_gravity="center"
+            android:src="@drawable/replay"
+            android:clickable="false"
+            android:contentDescription="@string/replay"
+            android:background="@android:color/transparent" />
+    </FrameLayout>
 
 </RelativeLayout>

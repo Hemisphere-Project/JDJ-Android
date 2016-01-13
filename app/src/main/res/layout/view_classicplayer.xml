@@ -18,6 +18,31 @@
         android:src="@drawable/lyle_owerko2"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:background="@color/pitch_black" />
+        android:background="@color/pitch_black"
+        android:contentDescription="@string/audio_shutter" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true"
+        android:id="@+id/replayShutter"
+        android:background="@android:color/transparent">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/black"
+            android:id="@+id/replayOverlay" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/replayBtn"
+            android:layout_gravity="center"
+            android:src="@drawable/replay"
+            android:clickable="false"
+            android:contentDescription="@string/replay"
+            android:background="@android:color/transparent" />
+    </FrameLayout>
 
 </RelativeLayout>

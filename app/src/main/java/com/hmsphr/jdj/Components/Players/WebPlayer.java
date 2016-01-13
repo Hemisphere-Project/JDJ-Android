@@ -3,11 +3,15 @@ package com.hmsphr.jdj.Components.Players;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
 public class WebPlayer implements PlayerCompat {
 
@@ -15,42 +19,35 @@ public class WebPlayer implements PlayerCompat {
     private WebView myWebView;
     private String contentUri;
 
-    /** WEBCLIENT: disable foreigns domains **/
+    /** WEBCLIENT: disable navigation **/
     private class ProtectedViewClient extends WebViewClient {
-        /*@Override
+
+        private String currentUrl;
+
+        public ProtectedViewClient(String currentUrl){
+            this.currentUrl = currentUrl;
+        }
+
+        @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            if (Uri.parse(url).getHost().equals(getResources().getString(R.string.web_domain))) {
-                // This is my web site, so do not override; let my WebView load the page
-                return false;
-            }
-            // Otherwise, the link is not for a page on my site, do nothing..
-            return true;
-        }*/
+            Log.d("jdj-WebPlayer", "trying to acces: "+url);
+            return (!url.equals(currentUrl));
+        }
     }
 
     public WebPlayer(Activity ctx, WebView view) {
 
         context = ctx;
         myWebView = view;
-
-        //myWebView.getSettings().setLoadWithOverviewMode(true);
-        //myWebView.getSettings().setUseWideViewPort(true);
-
-
-        // Prevent external domains
-        myWebView.setWebViewClient(new WebViewClient());
-
-        // Enable Javascript
-        WebSettings webSettings = myWebView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
+        myWebView.getSettings().setJavaScriptEnabled(true);
 
         // Disable touch
-        myWebView.setOnTouchListener(new View.OnTouchListener() {
+        /*myWebView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 return true;
             }
-        });
+        });*/
     }
 
     public void load(String url) {
@@ -60,6 +57,7 @@ public class WebPlayer implements PlayerCompat {
     public void play()
     {
         //myWebView.clearCache(true);
+        myWebView.setWebViewClient(new ProtectedViewClient(contentUri));
         myWebView.loadUrl(contentUri);
         myWebView.setVisibility(View.VISIBLE);
         context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -85,5 +83,13 @@ public class WebPlayer implements PlayerCompat {
     public void hide() {
         myWebView.setVisibility(View.GONE);
     }
+
+    // UNUSED INTERFACE
+    public void setAudioShutter(ImageView audioS) {}
+    public void showAudioShutter() {}
+    public void hideAudioShutter() {}
+    public void setReplayMenu(FrameLayout replayV, FrameLayout replayO, ImageButton replayB) {}
+    public void enableReplay() {}
+    public void disableReplay() {}
 
 }

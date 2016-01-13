@@ -172,7 +172,8 @@ public class RemoteControl extends ThreadComponent {
         // Store command in Cache Buffer
         try {
             if (task.has("cache") && task.getBoolean("cache")) cmd_buffer = task;
-            mail("application_need_attention").to(Manager.class).send();
+            if (task.has("action"))
+                mail("application_need_attention").to(Manager.class).add("action", task.getString("action")).send();
         } catch (JSONException e) { Log.d("RC-client", "invalid JSON: "+e.toString()); }
     }
 
@@ -249,11 +250,14 @@ public class RemoteControl extends ThreadComponent {
         try {
             // CHECK Version
             String[] version = BuildConfig.VERSION_NAME.split("\\.");
-            if (version.length >= 2) {
-                if (obj.getJSONObject("version").getInt("major") > Integer.parseInt(version[0]))
+            if (version.length >= 3) {
+                if (obj.getJSONObject("version").getInt("main") > Integer.parseInt(version[0]))
                     mail("version_major_outdated").to(Manager.class).send();
 
-                if (obj.getJSONObject("version").getInt("minor") > Integer.parseInt(version[1]))
+                if (obj.getJSONObject("version").getInt("major") > Integer.parseInt(version[1]))
+                    mail("version_major_outdated").to(Manager.class).send();
+
+                if (obj.getJSONObject("version").getInt("minor") > Integer.parseInt(version[2]))
                     mail("version_minor_outdated").to(Manager.class).send();
             }
 
@@ -319,7 +323,7 @@ public class RemoteControl extends ThreadComponent {
 
                 // PLAYER ENGINE SELECTOR: web | audio | video | phone
                 if (task.has("category")) msg.add("engine", task.getString("category"));
-                else msg.add("param1", "none");
+                else msg.add("engine", "");
 
                 // EXTRA PARAMETER
                 if (task.has("param1")) msg.add("param1", task.getString("param1"));

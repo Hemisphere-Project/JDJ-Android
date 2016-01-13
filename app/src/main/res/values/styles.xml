@@ -27,4 +27,10 @@
         <item name="android:windowBackground">@android:color/black</item>
     </style>
 
+    <!-- Alert Dialog -->
+    <style name="MyAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
+
+
+    </style>
+
 </resources>

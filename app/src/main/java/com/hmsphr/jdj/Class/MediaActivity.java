@@ -41,11 +41,10 @@ public class MediaActivity extends ManagedActivity {
             String url = intent.getStringExtra("url");
             String mode = intent.getStringExtra("mode");
 
-            // Shutter mode AUDIO / VIDEO
+            // Shutter mode AUDIO
             if (mode != null) {
-                ImageView audioShutter = (ImageView) findViewById(R.id.audioShutter);
-                if (mode.equals("video")) audioShutter.setVisibility(View.GONE);
-                else if (mode.equals("audio")) audioShutter.setVisibility(View.VISIBLE);
+                if (mode.equals("audio")) player.showAudioShutter();
+                else player.hideAudioShutter();
             }
 
             // Execute command
