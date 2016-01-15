@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">JDJ</string>
 
+    <string name="settings_file">com.hmsphr.jdj.SETTINGS_FILE</string>
+
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_welcome">WelcomeActivity</string>
@@ -22,8 +24,10 @@
     <string name="on">[on]</string>
     <string name="failed">Playback failed</string>
 
-    <string name="welcome_connecting">Bienvenue !\n\nConnection au serveur\nde Spectacle en cours..</string>
-    <string name="welcome_nonetwork">Aucune connexion au réseau..\n\nVérifiez que vous êtes connecté à internet\nvia Wifi ou 3G/4G !</string>
+    <string name="welcome_connecting">Bienvenue !\n\nConnexion au serveur\nde Spectacle en cours..</string>
+    <string name="welcome_nonetwork">Aucune connexion au réseau..\n\nVérifiez que vous êtes connecté\nà internetvia Wifi ou 3G/4G !</string>
+    <string name="welcome_noserver">Impossible de joindre le serveur..\n\nVous serez alerté lorsque\nla communication sera rétablie.</string>
+    <string name="welcome_nouser">Vous devez vous inscrire\nà un spectacle..</string>
     <string name="welcome_showpast">Le spectacle est terminé..\n\nMerci de nous avoir suivi !\nA bientôt pour de nouvelles aventures...</string>
     <string name="welcome_showfuture">Le spectacle commencera bientôt !\n\nVous serez alerté en direct des évènements à venir..</string>
     <string name="welcome_showtime">Bienvenue\n\nLe spectacle est en cours,\nrestez connecté ! </string>
@@ -38,6 +42,13 @@
     <string name="updatable_text1">Une mise à jour est disponible pour l\'application.</string>
     <string name="updatable_text2">Vous pouvez l\'appliquer depuis Google Play ou en la téléchargeant manuellement.</string>
     <string name="updatable_bye">Bon spectacle !</string>
+
+    <string name="register_title">Inscription</string>
+    <string name="register_text1">Représentation:</string>
+    <string name="register_text2">Numéro de portable:</string>
+    <string name="register_text3">Votre numéro ne sera transmis à aucun tiers, et servira uniquement à vous tenir au courant des évènements concernant la représentation choisie.</string>
+    <string name="register_bye">Bon spectacle !</string>
+
     <string name="audio_shutter">audio shutter</string>
     <string name="replay_shutter">replay shutter</string>
     <string name="replay">replay</string>

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -16,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.hmsphr.jdj.R;
 import com.hmsphr.jdj.Services.Manager;
 
 /*
@@ -45,6 +47,11 @@ public class ManagedActivity extends Activity {
     };
 
 
+    // SETTINGS
+    protected SharedPreferences settings() {
+        return this.getSharedPreferences(
+                this.getString(R.string.settings_file), this.MODE_PRIVATE);
+    }
 
 
     // Auto-start Manager if not already existing

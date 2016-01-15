@@ -83,9 +83,11 @@ public class Manager extends Service {
     public static final int STATE_INIT = 0;
     public static final int STATE_NONET = 1;
     public static final int STATE_NOSERV = 2;
-    public static final int STATE_SHOWPAST = 10;
-    public static final int STATE_SHOWFUTURE = 11;
-    public static final int STATE_SHOWTIME = 12;
+    public static final int STATE_NOUSER = 3;
+    public static final int STATE_READY = 10;
+    public static final int STATE_SHOWPAST = 11;
+    public static final int STATE_SHOWFUTURE = 12;
+    public static final int STATE_SHOWTIME = 13;
 
     public void setMode(int mode) {
 
@@ -94,7 +96,6 @@ public class Manager extends Service {
         if (APP_MODE >= MODE_STANDBY)
         {
             APP_MODE = mode;
-            remoteControl.setMode(APP_MODE);
             setState(APP_STATE);
             if (APP_MODE == MODE_WELCOME) remoteControl.start();
         }
@@ -104,14 +105,24 @@ public class Manager extends Service {
         // LOG
         if (APP_MODE == MODE_STANDBY) Log.v("jdj-Manager", "Manager disconnected: STANDBY ");
         else Log.d("jdj-Manager", "Manager MODE: " + APP_MODE);
+
+        // Inform RemoteControl of player state
+        remoteControl.playerReady( this.readyToPlay() );
     }
 
     public void setState(int state) {
         APP_STATE = state;
         Log.d("jdj-Manager", "Manager STATE: " + APP_STATE);
 
-        if ((APP_MODE == MODE_WELCOME) || (APP_MODE > MODE_WELCOME && APP_STATE < STATE_SHOWPAST))
+        if ((APP_MODE == MODE_WELCOME) || (APP_MODE > MODE_WELCOME && APP_STATE < STATE_READY))
             mail("update_state").to(WelcomeActivity.class).add("state", APP_STATE).send();
+
+        // Inform RemoteControl of player state
+        remoteControl.playerReady(this.readyToPlay());
+    }
+
+    public boolean readyToPlay() {
+        return (APP_STATE >= STATE_READY) && (APP_MODE >= MODE_WELCOME);
     }
 
 
@@ -296,30 +307,30 @@ public class Manager extends Service {
 
         // Process intents
         if (intent != null && intent.hasExtra("message")) {
-            String info = intent.getStringExtra("message");
+            String msg = intent.getStringExtra("message");
 
-                // ACTIVITY RESUMED
-            if (info.equals("activity_connect")) {
+            // ACTIVITY RESUMED
+            if (msg.equals("activity_connect")) {
                 ACTIVITY_LINKED++;
                 Log.d("jdj-Manager", "mode set by activity: "+intent.getIntExtra("mode", MODE_STANDBY));
                 setMode(intent.getIntExtra("mode", MODE_STANDBY));
             }
 
-                // ACTIVITY PAUSED
-            else if (info.equals("activity_disconnect")) {
+            // ACTIVITY PAUSED
+            else if (msg.equals("activity_disconnect")) {
                 ACTIVITY_LINKED = Math.max(ACTIVITY_LINKED-1, 0);
                 if (ACTIVITY_LINKED == 0) setMode(MODE_STANDBY);
             }
 
-                // COMMAND
-            else if (info.equals("command")) {
+            // COMMAND
+            else if (msg.equals("command")) {
 
                 String action = intent.getStringExtra("action");
                 String engine = intent.getStringExtra("engine");
                 String param1 = intent.getStringExtra("param1");
 
                 // PLAY
-                if (action.equals("play"))
+                if (action.equals("play") && readyToPlay())
                 {
                     Mailbox msgPlay = mail("play");
                     boolean sendToActivity = true;
@@ -356,25 +367,28 @@ public class Manager extends Service {
             }
 
                 // CLOSE APP & SERVICE
-            else if (info.equals("application_timeout") || info.equals("application_stop")) stopApp();
+            else if (msg.equals("application_timeout") || msg.equals("application_stop")) stopApp();
 
                 // DISPLAY NOTIFICATION
-            else if (info.equals("application_need_attention")) {
+            else if (msg.equals("application_need_attention")) {
                 clearNotification();
                 if (intent.getStringExtra("action").equals("play")) notifyEvent();
             }
 
                 // DISPLAY NOTIFICATION
-            else if (info.equals("application_standby")) clearNotification();
+            else if (msg.equals("application_standby")) clearNotification();
 
                 // MAJOR VERSION OUTDATED
-            else if (info.equals("version_major_outdated")) setMode(MODE_BROKEN);
+            else if (msg.equals("version_major_outdated")) setMode(MODE_BROKEN);
 
                 // MINOR VERSION OUTDATED
-            else if (info.equals("version_minor_outdated")) advertiseUpdate();
+            else if (msg.equals("version_minor_outdated")) advertiseUpdate();
 
             // UPDATE STATE
-            else if (info.equals("update_state")) setState(intent.getIntExtra("state", STATE_INIT));
+            else if (msg.equals("update_state")) setState(intent.getIntExtra("state", STATE_INIT));
+
+            // REGISTRATION
+            else if (msg.equals("do_register")) remoteControl.registrationReady(true);
 
         }
 

@@ -28,9 +28,13 @@
     </style>
 
     <!-- Alert Dialog -->
-    <style name="MyAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <style name="AppDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+    </style>
 
-
+    <style name="AppSpinner" parent="Widget.AppCompat.Spinner">
+        <item name="android:textColor">@color/white_opaque</item>
+        <item name="android:colorBackground">#222222</item>
+        <item name="android:textSize">20dp</item>
     </style>
 
 </resources>

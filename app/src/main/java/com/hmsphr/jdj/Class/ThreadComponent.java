@@ -2,8 +2,11 @@ package com.hmsphr.jdj.Class;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.SystemClock;
 import android.util.Log;
+
+import com.hmsphr.jdj.R;
 
 /*
 PREPARED COMPONENT WITH THREADED ACTION
@@ -22,6 +25,12 @@ abstract public class ThreadComponent {
     protected Mailbox mail(String msg) {
         Mailbox mail = new Mailbox();
         return mail.put(msg).from(appContext);
+    }
+
+    // SETTINGS
+    protected SharedPreferences settings() {
+        return appContext.getSharedPreferences(
+                appContext.getString(R.string.settings_file), appContext.MODE_PRIVATE);
     }
 
     // THREAD TOOLS

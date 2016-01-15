@@ -33,4 +33,5 @@ dependencies {
     compile 'org.zeromq:jeromq:0.3.5'
     compile 'com.google.android.exoplayer:exoplayer:r1.4.2'
     compile 'com.github.nkzawa:socket.io-client:0.3.0'
+    compile 'com.google.code.gson:gson:2.5'
 }

@@ -1,31 +1,45 @@
 package com.hmsphr.jdj.Activities;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.hmsphr.jdj.Class.ManagedActivity;
+import com.hmsphr.jdj.Class.Utils.Show;
+import com.hmsphr.jdj.Class.Utils.ShowList;
+import com.hmsphr.jdj.Components.RemoteControl;
 import com.hmsphr.jdj.R;
 import com.hmsphr.jdj.Services.Manager;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 
 public class WelcomeActivity extends ManagedActivity {
 
     protected static Class myClass = WelcomeActivity.class;
 
     protected FrameLayout dialogBox;
-    protected FrameLayout dialogOverlay;
-    protected Button dialogOK;
-    protected TextView dialogTitle;
-    protected TextView dialogText;
+    protected FrameLayout registerBox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,21 +48,13 @@ public class WelcomeActivity extends ManagedActivity {
 
         MODE = Manager.MODE_WELCOME;
 
-        // Dialog Handlers
+        // Dialog Handler
         dialogBox = (FrameLayout) findViewById(R.id.dialogBox);
-        dialogOverlay = (FrameLayout) findViewById(R.id.dialogOverlay);
-        dialogOK = (Button) findViewById(R.id.dialogOK);
-        dialogTitle = (TextView) findViewById(R.id.dialogTitle);
-        dialogText = (TextView) findViewById(R.id.dialogText);
-
-        // Hide Dialog box
         dialogBox.setVisibility(View.GONE);
 
-        // Set Alpha Background (API 10 compat)
-        AlphaAnimation animation = new AlphaAnimation(0.6f, 0.6f);
-        animation.setDuration(0);
-        animation.setFillAfter(true);
-        dialogOverlay.startAnimation(animation);
+        // Register Handler
+        registerBox = (FrameLayout) findViewById(R.id.registerBox);
+        registerBox.setVisibility(View.GONE);
 
     }
 
@@ -80,6 +86,13 @@ public class WelcomeActivity extends ManagedActivity {
         else if (State == Manager.STATE_NONET) {
             text.setText(R.string.welcome_nonetwork);
         }
+        else if (State == Manager.STATE_NOSERV) {
+            text.setText(R.string.welcome_noserver);
+        }
+        else if (State == Manager.STATE_NOUSER) {
+            text.setText(R.string.welcome_nouser);
+            alertRegister();
+        }
         else if (State == Manager.STATE_SHOWPAST) {
             text.setText(R.string.welcome_showpast);
         }
@@ -99,10 +112,21 @@ public class WelcomeActivity extends ManagedActivity {
         Log.d("WELCOME-activity", "BROKEN VERSION !");
         // TODO: Bouton de redirection vers Google Play
 
+        // Get Widgets
+        Button dialogOK = (Button) findViewById(R.id.dialogOK);
+        TextView dialogTitle = (TextView) findViewById(R.id.dialogTitle);
+        TextView dialogText = (TextView) findViewById(R.id.dialogText);
+
+        // Set Alpha Background (API 10 compat)
+        FrameLayout dialogOverlay = (FrameLayout) findViewById(R.id.dialogOverlay);
+        AlphaAnimation animation = new AlphaAnimation(0.6f, 0.6f);
+        animation.setDuration(0);
+        animation.setFillAfter(true);
+        dialogOverlay.startAnimation(animation);
 
         if (majorBreak) {
             dialogTitle.setText(getResources().getString(R.string.expired_title));
-            dialogText.setText(Html.fromHtml("<font color='#EEEEEE'><b>"+getResources().getString(R.string.expired_text1)+"</b><br /><br />"
+            dialogText.setText(Html.fromHtml("<b>"+getResources().getString(R.string.expired_text1)+"<br /><br />"
                     +getResources().getString(R.string.expired_text2)+"<br /><br />"
                     +getResources().getString(R.string.expired_bye)+"</font>"));
             dialogOK.setOnClickListener(new View.OnClickListener() {
@@ -114,7 +138,7 @@ public class WelcomeActivity extends ManagedActivity {
         }
         else {
             dialogTitle.setText(getResources().getString(R.string.updatable_title));
-            dialogText.setText(Html.fromHtml("<font color='#EEEEEE'><b>"+getResources().getString(R.string.updatable_text1)+"</b><br /><br />"
+            dialogText.setText(Html.fromHtml("<b>"+getResources().getString(R.string.updatable_text1)+"<br /><br />"
                     +getResources().getString(R.string.updatable_text2)+"<br /><br />"
                     +getResources().getString(R.string.updatable_bye)+"</font>"));
             dialogOK.setOnClickListener(new View.OnClickListener() {
@@ -127,6 +151,81 @@ public class WelcomeActivity extends ManagedActivity {
 
         dialogBox.setVisibility(View.VISIBLE);
 
+    }
+
+    void alertRegister() {
+
+        // Get Widgets
+        final EditText registerPhone = (EditText) findViewById(R.id.registerPhone);
+        final Spinner registerShow = (Spinner) findViewById(R.id.registerShow);
+        Button registerOK = (Button) findViewById(R.id.registerOK);
+
+        // Set Alpha Background (API 10 compat)
+        FrameLayout registerOverlay = (FrameLayout) findViewById(R.id.registerOverlay);
+        AlphaAnimation animation = new AlphaAnimation(0.6f, 0.6f);
+        animation.setDuration(0);
+        animation.setFillAfter(true);
+        registerOverlay.startAnimation(animation);
+
+        // pre-fill phone number
+        String mPhoneNumber = "";
+        try {
+            TelephonyManager tMgr = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
+            mPhoneNumber = tMgr.getLine1Number();
+        } catch (SecurityException e) {}
+        String phone = settings().getString("com.hmsphr.jdj.phone", mPhoneNumber);
+        registerPhone.setText(phone);
+
+        // populate show list
+        Gson gson = new Gson();
+        String showlist_import = settings().getString("com.hmsphr.jdj.show_list", null);
+        final ShowList showlist = new ShowList();
+        showlist.inflate(showlist_import);
+        Show myShow = Show.inflate( settings().getString("com.hmsphr.jdj.show", null) );
+
+        Spinner spinner = (Spinner) findViewById(R.id.registerShow);
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
+                this, R.layout.spinner_item, showlist.itemsList());
+        spinnerArrayAdapter.setDropDownViewResource( R.layout.spinner_dropdown_item );
+        spinner.setAdapter(spinnerArrayAdapter);
+        if (myShow != null) spinner.setSelection(spinnerArrayAdapter.getPosition( myShow.label() ));
+
+
+        // display error
+        String error = settings().getString("com.hmsphr.jdj.error_user", "");
+        TextView disclaimer = (TextView) findViewById(R.id.registerText3);
+        if (error.equals("")) {
+            disclaimer.setText(getResources().getString(R.string.register_text3));
+            disclaimer.setTextColor(Color.WHITE);
+        }
+        else {
+            disclaimer.setText(error);
+            disclaimer.setTextColor(Color.RED);
+        }
+
+        registerOK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO: Check phone number validity !
+
+                // FIND SHOW
+                Show myShow = showlist.find( registerShow.getSelectedItem().toString() );
+
+                // SAVE Locally
+                settings().edit().putString("com.hmsphr.jdj.phone", registerPhone.getText().toString())
+                    .putString("com.hmsphr.jdj.show", myShow.export())
+                    .commit();
+
+
+                // HIDE Box
+                registerBox.setVisibility(View.GONE);
+
+                // SEND to server
+                mail("do_register").to(Manager.class).send();
+            }
+        });
+
+        registerBox.setVisibility(View.VISIBLE);
     }
 
 }
