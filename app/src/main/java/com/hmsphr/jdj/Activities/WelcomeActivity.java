@@ -171,7 +171,7 @@ public class WelcomeActivity extends ManagedActivity {
         String mPhoneNumber = "";
         try {
             TelephonyManager tMgr = (TelephonyManager) this.getSystemService(Context.TELEPHONY_SERVICE);
-            mPhoneNumber = tMgr.getLine1Number();
+            mPhoneNumber = tMgr.getLine1Number().replace("+33","0");
         } catch (SecurityException e) {}
         String phone = settings().getString("com.hmsphr.jdj.phone", mPhoneNumber);
         registerPhone.setText(phone);
