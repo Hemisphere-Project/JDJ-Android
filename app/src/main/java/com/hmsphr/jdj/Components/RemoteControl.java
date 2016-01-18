@@ -1,10 +1,12 @@
 package com.hmsphr.jdj.Components;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.zeromq.ZMQ;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -12,10 +14,13 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import com.github.nkzawa.emitter.Emitter;
+import com.google.gson.Gson;
 import com.hmsphr.jdj.Activities.WelcomeActivity;
 import com.hmsphr.jdj.BuildConfig;
 import com.hmsphr.jdj.Class.Mailbox;
 import com.hmsphr.jdj.Class.ThreadComponent;
+import com.hmsphr.jdj.Class.Utils.Show;
+import com.hmsphr.jdj.Class.Utils.ShowList;
 import com.hmsphr.jdj.R;
 import com.hmsphr.jdj.Services.Manager;
 
@@ -23,6 +28,10 @@ import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 
@@ -31,7 +40,8 @@ public class RemoteControl extends ThreadComponent {
     private long APP_TIMEOUT = 24*60*60*1000;  //Default value: 24H
     private long lastactivity = 0;
 
-    private int MODE = 0; // dispatch flag between player and notifier
+    private boolean PLAYER_READY = false; // dispatch flag between player and notifier
+    private boolean PERFORM_REGISTRATION = false; // DO REGISTER FLAG
 
     private ZMQ.Context context = ZMQ.context(1);
     private ZMQ.Socket remotePublisher = context.socket(ZMQ.SUB);
@@ -55,14 +65,19 @@ public class RemoteControl extends ThreadComponent {
     }
 
     // MODE
-    public void setMode(int mode) {
-        MODE = mode;
+    public void playerReady(boolean isReady) {
+        PLAYER_READY = isReady;
+    }
+
+    // REGISTER
+    public void registrationReady(boolean isReady) {
+        PERFORM_REGISTRATION = isReady;
     }
 
     // STATE
     private void setState(int state) {
-        if (state != STATE) mail("update_state").to(Manager.class).add("state", state).send();
         STATE = state;
+        mail("update_state").to(Manager.class).add("state", STATE).send();
     }
 
     // CHECK NETWORK AVAILABILITY
@@ -96,6 +111,20 @@ public class RemoteControl extends ThreadComponent {
 
         })
 
+        // ON WHOAREYOU
+        .on("whoareyou", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                //send iam with userId
+                int userId = settings().getInt("com.hmsphr.jdj.userid", -1);
+                JSONObject obj = new JSONObject();
+                try {
+                    if (userId >= 0) obj.put("userid", userId);
+                } catch (JSONException e) {}
+                mSocket.emit("iam", obj);
+            }
+        })
+
         // ON HELLO
         .on("hello", new Emitter.Listener() {
             @Override
@@ -120,7 +149,7 @@ public class RemoteControl extends ThreadComponent {
 
         })
 
-        // ON DISCONNECT
+                // ON DISCONNECT
         .on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
@@ -170,6 +199,10 @@ public class RemoteControl extends ThreadComponent {
 
     private void storeTask(JSONObject task) {
         // Store command in Cache Buffer
+        if (task == null) {
+            cmd_buffer = null;
+            return;
+        }
         try {
             if (task.has("cache") && task.getBoolean("cache")) cmd_buffer = task;
             if (task.has("action"))
@@ -179,8 +212,30 @@ public class RemoteControl extends ThreadComponent {
 
     private void tryBuffer() {
         // APP now available: execute stored commands
-        if (cmd_buffer != null && MODE >= Manager.MODE_WELCOME)
+        if (cmd_buffer != null && PLAYER_READY)
             processCommand(cmd_buffer);
+    }
+
+    private void doRegister() {
+        if (PERFORM_REGISTRATION && CONNECTED) {
+            PERFORM_REGISTRATION = false;
+            JSONObject obj = new JSONObject();
+            try {
+                int userId = settings().getInt("com.hmsphr.jdj.userid", -1);
+                if (userId >= 0) obj.put("userid", userId);
+
+                String phone = settings().getString("com.hmsphr.jdj.phone", null);
+                obj.put("number", phone);
+
+                String s = settings().getString("com.hmsphr.jdj.show", null);
+                Show theshow = Show.inflate( s );
+                if (theshow != null) obj.put("showid", theshow.getId());
+                obj.put("os", "android-"+android.os.Build.VERSION.SDK_INT);
+
+            } catch (JSONException e) {}
+
+            mSocket.emit("subscribe", obj);
+        }
     }
 
 
@@ -207,12 +262,14 @@ public class RemoteControl extends ThreadComponent {
         if (isNetworkAvailable()) {
             checkConnect();
             tryBuffer();
+            doRegister();
         }
 
         // NO NETWORK: wait disconnected
         else {
             disconnect();
-            setState(Manager.STATE_NONET);
+            if (STATE != Manager.STATE_NONET)
+                setState(Manager.STATE_NONET);
         }
 
         // THREAD LOOP DO NOTHING: it should sleep
@@ -247,38 +304,125 @@ public class RemoteControl extends ThreadComponent {
 
     public void processHello(JSONObject obj) {
         Log.d("RC-client", "WS hello: " + obj);
+
+        // USER
+        Integer userId = null;
+        String errorUser = null;
+
+        // VERSION
+        int serverVersion[] = {0,0,0};
+
+        // LVC
+        JSONObject lvcTask = null;
+
+        // PARSE Hello Object
         try {
-            // CHECK Version
-            String[] version = BuildConfig.VERSION_NAME.split("\\.");
-            if (version.length >= 3) {
-                if (obj.getJSONObject("version").getInt("main") > Integer.parseInt(version[0]))
-                    mail("version_major_outdated").to(Manager.class).send();
+            // RETRIEVE user info
+            JSONObject user = obj.getJSONObject("user");
 
-                if (obj.getJSONObject("version").getInt("major") > Integer.parseInt(version[1]))
-                    mail("version_major_outdated").to(Manager.class).send();
-
-                if (obj.getJSONObject("version").getInt("minor") > Integer.parseInt(version[2]))
-                    mail("version_minor_outdated").to(Manager.class).send();
+            // User id
+            if (!user.isNull("id")) {
+                userId = user.getInt("id");
+                settings().edit().putInt("com.hmsphr.jdj.userid", userId).commit();
             }
 
+            // Phone number
+            if (!user.isNull("number")) {
+                settings().edit()
+                        .putString("com.hmsphr.jdj.phone", user.getString("number"))
+                        .commit();
+            }
+
+            // Event selected
+            if (!user.isNull("event")) {
+                Show theShow = new Show(user.getJSONObject("event").getInt("id"),
+                                        user.getJSONObject("event").getString("date"),
+                                        user.getJSONObject("event").getString("place"));
+                settings().edit()
+                        .putString("com.hmsphr.jdj.show", theShow.export())
+                        .commit();
+            }
+
+            // Make show list
+            if (obj.has("showlist") && !obj.isNull("showlist")) {
+
+                ShowList showlist = new ShowList();
+                JSONArray list = obj.getJSONArray("showlist");
+                for (int i = 0; i < list.length(); i++) {
+                    JSONObject row = list.getJSONObject(i);
+                    showlist.addShow(row.getInt("id"), row.getString("date"), row.getString("place"));
+                }
+                //Log.e("jdj-RC", list_export.toString());
+
+                settings().edit()
+                        .putString("com.hmsphr.jdj.show_list", showlist.export())
+                        .commit();
+            }
+
+            // ERRORS
+            if (!user.isNull("error")) {
+                Log.d("jdj-RC", "error found: "+user.getString("number"));
+                errorUser = user.getString("error");
+                settings().edit().putString("com.hmsphr.jdj.error_user", errorUser).commit();
+            }
+            else settings().edit().putString("com.hmsphr.jdj.error_user", "").commit();
+
+            // Get Version
+            serverVersion[0] = obj.getJSONObject("version").getInt("main");
+            serverVersion[1] = obj.getJSONObject("version").getInt("major");
+            serverVersion[2] = obj.getJSONObject("version").getInt("minor");
+
+            // Get LVC Task
+            if (obj.has("lvc")) lvcTask = obj.getJSONObject("lvc");
+
+        } catch (JSONException e) { Log.d("RC-client", "invalid JSON: "+e.toString()); }
+
+        // App version fetching
+        String[] version = BuildConfig.VERSION_NAME.split("\\.");
+        int appVersion[] = {0,0,0};
+        if (version.length >= 3) {
+            appVersion[0] = Integer.parseInt(version[0]);
+            appVersion[1] = Integer.parseInt(version[1]);
+            appVersion[2] = Integer.parseInt(version[2]);
+        }
+
+        // CHECK If Major version break
+        if ((serverVersion[0] > appVersion[0]) || (serverVersion[1] > appVersion[1])) {
+            mail("version_major_outdated").to(Manager.class).send();
+        }
+
+        // USER INFO INCOMPLETE: Trigger Register FORM
+        else if (userId == null || errorUser != null) {
+            setState(Manager.STATE_NOUSER);
+        }
+
+        // USER INFO COMPLETE: Proceed
+        else
+        {
+            // Minor VERSION Checking
+            if (serverVersion[2] > appVersion[2])
+                    mail("version_minor_outdated").to(Manager.class).send();
+
             // Check SHOW STATE
-            int showState = 0;
+            // TODO: SHOW START - END STARTEGY
+            /*int showState = 0;
             Long deltaTime = obj.getLong("nextshow") - System.currentTimeMillis();
             Log.d("RC-client", "Delta Next show: NOW: " + System.currentTimeMillis() + " SHOW: " + obj.getLong("nextshow") + " DELTA: " + deltaTime);
             if (deltaTime < 0) showState = Manager.STATE_SHOWPAST;
             else if (deltaTime < 24*60*60*1000) showState = Manager.STATE_SHOWTIME;
-            else showState = Manager.STATE_SHOWFUTURE;
+            else showState = Manager.STATE_SHOWFUTURE;*/
+            int showState = Manager.STATE_SHOWTIME;
             setState(showState);
 
-            // PARSE LVC
-            if (obj.has("lvc")) storeTask(obj.getJSONObject("lvc"));
+            // STORE LVC
+            storeTask(lvcTask);
 
             // DOWNLOAD AVAILABLE MEDIA
-            if (obj.has("medialist") && showState == Manager.STATE_SHOWFUTURE) {
+            /*if (obj.has("medialist") && showState == Manager.STATE_SHOWFUTURE) {
                 // TODO: get media list and enqueue download tasks
-            }
+            }*/
+        }
 
-        } catch (JSONException e) { Log.d("RC-client", "invalid JSON: "+e.toString()); }
     }
 
     protected void processCommand(JSONObject task) {
@@ -296,7 +440,7 @@ public class RemoteControl extends ThreadComponent {
 
             //APP is not available
             //
-            if (MODE < Manager.MODE_WELCOME) {
+            if (!PLAYER_READY) {
                 storeTask(task);
                 return;
             }

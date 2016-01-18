@@ -1,14 +1,12 @@
-package com.hmsphr.jdj.Class;
-
-import android.app.Activity;
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
+package com.hmsphr.jdj.Class.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-class SortedArrayList<T> extends ArrayList<T> {
+/**
+ * Created by mgr on 15/01/16.
+ */
+public class SortedArrayList<T> extends ArrayList<T> {
     @SuppressWarnings("unchecked")
     public void insertSorted(T value) {
         add(value);
@@ -17,4 +15,3 @@ class SortedArrayList<T> extends ArrayList<T> {
             Collections.swap(this, i, i - 1);
     }
 }
-

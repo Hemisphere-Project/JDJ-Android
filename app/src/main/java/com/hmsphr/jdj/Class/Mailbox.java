@@ -47,7 +47,7 @@ public class Mailbox {
         Log.d("Mailbox", "Message posted from: "+context.getClass().toString()+" To: " + destination.getSuperclass());
         if (isActivity()) context.startActivity(intent);
         else if (isService()) context.startService(intent);
-        else Log.d("Mailbox", "Unknown destination");
+        else Log.e("Mailbox", "Unknown destination");
     }
 
     private boolean isActivity() {
