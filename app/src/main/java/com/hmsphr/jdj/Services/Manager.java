@@ -17,6 +17,7 @@ import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.hmsphr.jdj.Activities.TextActivity;
 import com.hmsphr.jdj.Activities.VideoActivity;
 import com.hmsphr.jdj.Activities.WebActivity;
 import com.hmsphr.jdj.Activities.WelcomeActivity;
@@ -114,6 +115,7 @@ public class Manager extends Service {
         APP_STATE = state;
         Log.d("jdj-Manager", "Manager STATE: " + APP_STATE);
 
+        // Send State to Welcome activity
         if ((APP_MODE == MODE_WELCOME) || (APP_MODE > MODE_WELCOME && APP_STATE < STATE_READY))
             mail("update_state").to(WelcomeActivity.class).add("state", APP_STATE).send();
 
@@ -293,7 +295,7 @@ public class Manager extends Service {
         super.onCreate();
         setMode(MODE_STANDBY);
 
-        //commander.start();
+        // Start sync
         clock.start();
 
         // Set Volume to 80%
@@ -327,6 +329,7 @@ public class Manager extends Service {
 
                 String action = intent.getStringExtra("action");
                 String engine = intent.getStringExtra("engine");
+                String payload = intent.getStringExtra("payload");
                 String param1 = intent.getStringExtra("param1");
 
                 // PLAY
@@ -335,9 +338,11 @@ public class Manager extends Service {
                     Mailbox msgPlay = mail("play");
                     boolean sendToActivity = true;
 
+                    // SELECT ENGINE
                     if (engine.equals("web")) msgPlay.to(WebActivity.class);
-                    else if (engine.equals("video")) msgPlay.to(VideoActivity.class).add("mode", "video");
+                    else if (engine.equals("video")) msgPlay.to(VideoActivity.class);
                     else if (engine.equals("audio")) msgPlay.to(VideoActivity.class).add("mode", "audio");
+                    else if (engine.equals("text")) msgPlay.to(TextActivity.class);
                     else if (engine.equals("phone"))
                     {
                         if (param1.equals("lightOn")) lightOn();
@@ -351,10 +356,11 @@ public class Manager extends Service {
                         sendToActivity = false;
                     }
 
+                    // ADD PAYLOAD
                     if (sendToActivity) {
                         Log.d("jdj-Manager", "New command sent to: " + engine);
                         setMode(MODE_PLAY);
-                        msgPlay.add("url", intent.getStringExtra("filepath")).send();
+                        msgPlay.add("payload", payload).send();
                     }
                 }
                 // STOP

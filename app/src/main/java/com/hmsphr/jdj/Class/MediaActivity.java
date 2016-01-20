@@ -38,7 +38,7 @@ public class MediaActivity extends ManagedActivity {
         // Check if player is available
         if (player != null) {
             String action = intent.getStringExtra("message");
-            String url = intent.getStringExtra("url");
+            String payload = intent.getStringExtra("payload");
             String mode = intent.getStringExtra("mode");
 
             // Shutter mode AUDIO
@@ -56,8 +56,8 @@ public class MediaActivity extends ManagedActivity {
 
             // PLAY
             else if (action.equals("play")) {
-                if (url == null) {error("Play action must provide an url");  return;}
-                player.load(url);
+                if (payload == null) {error("Play action must provide a payload");  return;}
+                player.load(payload);
                 player.play();
             }
         }

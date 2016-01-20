@@ -170,15 +170,6 @@ public class RemoteControl extends ThreadComponent {
             mSocket.connect();
             CONNECTING = true;
         }
-
-        // connect to proxy publisher
-        /*Log.d("RC-client", "Connecting zmq Publisher");
-        remotePublisher.connect(String.format("tcp://%s:%d",
-                appContext.getResources().getString(R.string.IP_PROXY),
-                appContext.getResources().getInteger(R.integer.PORT_PUB)));
-        remotePublisher.subscribe("".getBytes());
-        poller.register(remotePublisher, ZMQ.Poller.POLLIN);*/
-
     }
 
     // DISCONNECT && STOP TRYING TO CONNECT
@@ -275,27 +266,10 @@ public class RemoteControl extends ThreadComponent {
         // THREAD LOOP DO NOTHING: it should sleep
         SystemClock.sleep(500);
 
-        // Poll the subscriber stack
-        /*if(poller.poll(100) > 0) {
-            //if (poller.pollin(0)) { // check on first Poll register
-
-            data = remotePublisher.recvStr();
-
-            LOCK.lock();
-            processCommand(data);
-            LOCK.unlock();
-        }
-        */
-
-
     }
 
     @Override
     protected void close() {
-        // exit sockets
-        //remotePublisher.close();
-        //context.term();
-
         disconnect();
         mSocket.close();
         Log.d("jdj-RemoteControl", "-- RemoteControl stopped");
@@ -367,6 +341,12 @@ public class RemoteControl extends ThreadComponent {
             }
             else settings().edit().putString("com.hmsphr.jdj.error_user", "").commit();
 
+            // GROUP & SECTIONS
+            settings().edit().putString("com.hmsphr.jdj.group", user.getString("group")).commit();
+            settings().edit().putBoolean("com.hmsphr.jdj.section.A", user.getJSONObject("section").getBoolean("A")).commit();
+            settings().edit().putBoolean("com.hmsphr.jdj.section.B", user.getJSONObject("section").getBoolean("B")).commit();
+            settings().edit().putBoolean("com.hmsphr.jdj.section.C", user.getJSONObject("section").getBoolean("C")).commit();
+
             // Get Version
             serverVersion[0] = obj.getJSONObject("version").getInt("main");
             serverVersion[1] = obj.getJSONObject("version").getInt("major");
@@ -436,10 +416,43 @@ public class RemoteControl extends ThreadComponent {
         //Something is happening
         lastactivity = System.currentTimeMillis();
 
+        //Clear command buffer
+        cmd_buffer = null;
+
         try {
+
+            // Check if command has just been executed
+            if (task.has("timestamp")) {
+                int ts = task.getInt("timestamp");
+                if (ts == last_stamp) {
+                    Log.d("RC-client", "command already executed");
+                    return;
+                }
+                else last_stamp = ts;
+            }
+
+            // Check GROUP and SECTION
+            if (task.has("who")) {
+                boolean proceed = false;
+                if (task.getString("who").equals("all")) proceed = true;
+                else
+                {
+                    if (task.getString("who").equals(settings().getString("com.hmsphr.jdj.group", ""))) proceed = true;
+                    else {
+                        if (task.getString("who").equals("A") && settings().getBoolean("com.hmsphr.jdj.section.A", false)) proceed = true;
+                        if (task.getString("who").equals("B") && settings().getBoolean("com.hmsphr.jdj.section.B", false)) proceed = true;
+                        if (task.getString("who").equals("C") && settings().getBoolean("com.hmsphr.jdj.section.C", false)) proceed = true;
+                    }
+                }
+                if (!proceed) {
+                    Log.d("RC-client", "not in the group.. ignoring");
+                    return;
+                }
+            }
 
             //APP is not available
             //
+
             if (!PLAYER_READY) {
                 storeTask(task);
                 return;
@@ -447,15 +460,6 @@ public class RemoteControl extends ThreadComponent {
 
             //APP is available: execute command now !
             //
-            // Check if command has an expiration timestamp
-            if (task.has("timestamp")) {
-                int ts = task.getInt("timestamp");
-                if (ts <= last_stamp) {
-                    Log.d("RC-client", "command already executed");
-                    return;
-                }
-                else last_stamp = ts;
-            }
 
             // Parse "action"
             if (task.has("action")) {
@@ -465,7 +469,7 @@ public class RemoteControl extends ThreadComponent {
                 // ACTION TO PERFORM
                 msg.add("action", task.getString("action"));
 
-                // PLAYER ENGINE SELECTOR: web | audio | video | phone
+                // PLAYER ENGINE SELECTOR: web | audio | video | phone | text
                 if (task.has("category")) msg.add("engine", task.getString("category"));
                 else msg.add("engine", "");
 
@@ -473,38 +477,42 @@ public class RemoteControl extends ThreadComponent {
                 if (task.has("param1")) msg.add("param1", task.getString("param1"));
                 else msg.add("param1", "");
 
-                // FILE PATH SELECTOR (WORST TO BEST)
-                String filepath = null;
+                // PAYLOAD (content or url)
+                String payload = null;
                 int medialevel = 0;
 
-                // PROGRESSIVE STREAMING
-                if (task.has("url")) {
-                    filepath = task.getString("url");
-                    medialevel = 1;
-                }
+                    // STATIC CONTENT
+                    if (task.has("content")) payload = task.getString("content");
+                    else {
+                        // PROGRESSIVE STREAMING
+                        if (task.has("url")) {
+                            payload = task.getString("url");
+                            medialevel = 1;
+                        }
 
-                // ADAPTATIVE STREAMING
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                    if (task.has("hls")) {
-                        filepath = task.getString("hls");
-                        medialevel = 2;
+                        // ADAPTATIVE STREAMING
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                            if (task.has("hls")) {
+                                payload = task.getString("hls");
+                                medialevel = 2;
+                            }
+                        }
+
+                        // LOCAL FILE
+                        if (task.has("filename")) {
+                            // TODO CHECK IF FILE AVAILABLE LOCALLY
+                        /*File media = getMediaFile(appContext, command.getString("filename"));
+                        if (media.exists()) {
+                            payload = media.getPath();
+                            medialevel = 3;
+                        }*/
+                        }
                     }
-                }
-
-                // LOCAL FILE
-                if (task.has("filename")) {
-                    // TODO CHECK IF FILE AVAILABLE LOCALLY
-                    /*File media = getMediaFile(appContext, command.getString("filename"));
-                    if (media.exists()) {
-                        filepath = media.getPath();
-                        medialevel = 3;
-                    }*/
-                }
 
                 // ADD FILE
-                Log.d("RC-client", "media path: "+filepath+" level: "+medialevel);
+                Log.d("RC-client", "payload: "+payload+" level: "+medialevel);
                 msg.add("medialevel", medialevel);
-                msg.add("filepath", filepath);
+                msg.add("payload", payload);
 
 
                 msg.send();
@@ -514,8 +522,6 @@ public class RemoteControl extends ThreadComponent {
         }
         catch (JSONException e) { Log.d("RC-client", "invalid JSON "); }
 
-        //Empty command buffer
-        cmd_buffer = null;
     }
 
 
