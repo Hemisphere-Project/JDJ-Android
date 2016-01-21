@@ -29,9 +29,11 @@ import com.github.nkzawa.socketio.client.Socket;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
 
@@ -431,23 +433,15 @@ public class RemoteControl extends ThreadComponent {
                 else last_stamp = ts;
             }
 
-            // Check GROUP and SECTION
-            if (task.has("who")) {
-                boolean proceed = false;
-                if (task.getString("who").equals("all")) proceed = true;
-                else
-                {
-                    if (task.getString("who").equals(settings().getString("com.hmsphr.jdj.group", ""))) proceed = true;
-                    else {
-                        if (task.getString("who").equals("A") && settings().getBoolean("com.hmsphr.jdj.section.A", false)) proceed = true;
-                        if (task.getString("who").equals("B") && settings().getBoolean("com.hmsphr.jdj.section.B", false)) proceed = true;
-                        if (task.getString("who").equals("C") && settings().getBoolean("com.hmsphr.jdj.section.C", false)) proceed = true;
-                    }
-                }
-                if (!proceed) {
-                    Log.d("RC-client", "not in the group.. ignoring");
-                    return;
-                }
+            // Check GROUP
+            if (task.has("group") && !task.getString("group").equals(settings().getString("com.hmsphr.jdj.group", ""))) {
+                Log.d("RC-client", "not in the group.. ignoring");
+                return;
+            }
+            // Check SECTION
+            if (task.has("section") && !settings().getBoolean("com.hmsphr.jdj.section."+task.getString("section"), false) ) {
+                Log.d("RC-client", "not in the section.. ignoring");
+                return;
             }
 
             //APP is not available
@@ -482,7 +476,21 @@ public class RemoteControl extends ThreadComponent {
                 int medialevel = 0;
 
                     // STATIC CONTENT
-                    if (task.has("content")) payload = task.getString("content");
+                    if (task.has("content")) {
+
+                        // MULTIPLE CONTENT: PICK RANDOM ONE
+                        String[] contents = task.getString("content").split("//");
+                        if (contents.length > 1) {
+                            for (int index = 0; index < contents.length; index++)
+                                contents[index] = contents[index].trim();
+                            List<String> list = Arrays.asList(contents);
+                            list.removeAll(Arrays.asList("", null));
+                            Random randomGenerator = new Random();
+                            int index = randomGenerator.nextInt(list.size());
+                            payload = list.get(index);
+                        }
+                        else payload = task.getString("content");
+                    }
                     else {
                         // PROGRESSIVE STREAMING
                         if (task.has("url")) {
