@@ -17,7 +17,9 @@ public class TextActivity extends MediaActivity {
         setContentView(R.layout.view_textview);
 
         // Configure WebView
-        player = new TextPlayer(this, (TextView) findViewById(R.id.playerTEXT) );
+        TextView txtArea = (TextView) findViewById(R.id.playerTEXT);
+        txtArea.setTypeface(this.defaultFont);
+        player = new TextPlayer(this, txtArea );
 
         // Transfer first intent
         onNewIntent(getIntent());

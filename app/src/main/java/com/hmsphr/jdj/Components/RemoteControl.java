@@ -197,6 +197,7 @@ public class RemoteControl extends ThreadComponent {
             return;
         }
         try {
+            if (task.has("timestamp")) task.remove("timestamp");
             if (task.has("cache") && task.getBoolean("cache")) cmd_buffer = task;
             if (task.has("action"))
                 mail("application_need_attention").to(Manager.class).add("action", task.getString("action")).send();
@@ -397,7 +398,7 @@ public class RemoteControl extends ThreadComponent {
             setState(showState);
 
             // STORE LVC
-            storeTask(lvcTask);
+            processCommand(lvcTask);
 
             // DOWNLOAD AVAILABLE MEDIA
             /*if (obj.has("medialist") && showState == Manager.STATE_SHOWFUTURE) {
@@ -411,15 +412,15 @@ public class RemoteControl extends ThreadComponent {
         //TODO
         // - check if file is available in local
         // - use atTime for synced play
-        // - use GROUP_PUB
 
+        if (task == null) return;
         Log.d("RC-client", "WS task: " + task);
 
         //Something is happening
         lastactivity = System.currentTimeMillis();
 
         //Clear command buffer
-        cmd_buffer = null;
+        storeTask(null);
 
         try {
 
@@ -479,7 +480,7 @@ public class RemoteControl extends ThreadComponent {
                     if (task.has("content")) {
 
                         // MULTIPLE CONTENT: PICK RANDOM ONE
-                        String[] contents = task.getString("content").split("//");
+                        /*String[] contents = task.getString("content").split("%%");
                         if (contents.length > 1) {
                             for (int index = 0; index < contents.length; index++)
                                 contents[index] = contents[index].trim();
@@ -489,6 +490,10 @@ public class RemoteControl extends ThreadComponent {
                             int index = randomGenerator.nextInt(list.size());
                             payload = list.get(index);
                         }
+                        else payload = task.getString("content");*/
+                        // MULTIPLE CONTENT: PICK ONE based on USERID % MSGNBR
+                        String[] contents = task.getString("content").split("@%%#");
+                        if (contents.length > 1) payload = contents[ settings().getInt("com.hmsphr.jdj.userid", 0) % contents.length ];
                         else payload = task.getString("content");
                     }
                     else {

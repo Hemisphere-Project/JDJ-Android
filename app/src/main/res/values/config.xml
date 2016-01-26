@@ -8,6 +8,4 @@
     <integer name="PORT_CMD">8081</integer>
     <integer name="PORT_TIME">8082</integer>
 
-
-
 </resources>

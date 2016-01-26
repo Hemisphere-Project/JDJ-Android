@@ -78,6 +78,7 @@ public class WelcomeActivity extends ManagedActivity {
     void updateState(int State) {
 
         TextView text = (TextView) findViewById(R.id.welcomeText);
+        text.setTypeface(this.defaultFont);
         //Log.d("WelcomeActivity", "State: "+State);
 
         if (State == Manager.STATE_INIT) {
@@ -115,7 +116,9 @@ public class WelcomeActivity extends ManagedActivity {
         // Get Widgets
         Button dialogOK = (Button) findViewById(R.id.dialogOK);
         TextView dialogTitle = (TextView) findViewById(R.id.dialogTitle);
+        dialogTitle.setTypeface(this.defaultFont);
         TextView dialogText = (TextView) findViewById(R.id.dialogText);
+        dialogText.setTypeface(this.defaultFont);
 
         // Set Alpha Background (API 10 compat)
         FrameLayout dialogOverlay = (FrameLayout) findViewById(R.id.dialogOverlay);
@@ -194,6 +197,7 @@ public class WelcomeActivity extends ManagedActivity {
         // display error
         String error = settings().getString("com.hmsphr.jdj.error_user", "");
         TextView disclaimer = (TextView) findViewById(R.id.registerText3);
+        disclaimer.setTypeface(this.defaultFont);
         if (error.equals("")) {
             disclaimer.setText(getResources().getString(R.string.register_text3));
             disclaimer.setTextColor(Color.WHITE);
@@ -224,6 +228,12 @@ public class WelcomeActivity extends ManagedActivity {
                 mail("do_register").to(Manager.class).send();
             }
         });
+
+        // Set FONT
+        ((TextView) findViewById(R.id.registerText1)).setTypeface(defaultFont);
+        ((TextView) findViewById(R.id.registerText2)).setTypeface(defaultFont);
+        ((TextView) findViewById(R.id.registerText3)).setTypeface(defaultFont);
+        ((TextView) findViewById(R.id.registerTitle)).setTypeface(defaultFont);
 
         registerBox.setVisibility(View.VISIBLE);
     }

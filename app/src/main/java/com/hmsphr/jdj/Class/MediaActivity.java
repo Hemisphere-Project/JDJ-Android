@@ -2,6 +2,7 @@ package com.hmsphr.jdj.Class;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageView;
@@ -42,10 +43,8 @@ public class MediaActivity extends ManagedActivity {
             String mode = intent.getStringExtra("mode");
 
             // Shutter mode AUDIO
-            if (mode != null) {
-                if (mode.equals("audio")) player.showAudioShutter();
-                else player.hideAudioShutter();
-            }
+            if (mode != null && mode.equals("audio")) player.showAudioShutter();
+            else player.hideAudioShutter();
 
             // Execute command
             // STOP
