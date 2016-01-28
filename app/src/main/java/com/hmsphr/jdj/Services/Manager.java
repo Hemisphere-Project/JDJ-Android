@@ -133,8 +133,15 @@ public class Manager extends Service {
     STOP APP
      */
     public void stopApp() {
-        sendBroadcast(new Intent("exit_jdj"));
+        this.standbyApp();
         this.stopSelf();
+    }
+
+    /*
+    STOP APP
+     */
+    public void standbyApp() {
+        sendBroadcast(new Intent("exit_jdj"));
     }
 
     /*
@@ -331,6 +338,10 @@ public class Manager extends Service {
                 String engine = intent.getStringExtra("engine");
                 String payload = intent.getStringExtra("payload");
                 String param1 = intent.getStringExtra("param1");
+                long atTime = intent.getLongExtra("atTime", 0);
+
+                // TRANSLATE atTime to local time
+                if (atTime > 0) atTime = clock.translateToLocal(atTime);
 
                 // PLAY
                 if (action.equals("play") && readyToPlay())
@@ -356,16 +367,16 @@ public class Manager extends Service {
                         sendToActivity = false;
                     }
 
-                    // ADD PAYLOAD
+                    // ADD PAYLOAD & atTIME
                     if (sendToActivity) {
                         Log.d("jdj-Manager", "New command sent to: " + engine);
                         setMode(MODE_PLAY);
-                        msgPlay.add("payload", payload).send();
+                        msgPlay.add("payload", payload).add("atTime",atTime).send();
                     }
                 }
                 // STOP
                 else if (action.equals("stop")) {
-                    mail("stop").to(WelcomeActivity.class).send();
+                    mail("stop").to(WelcomeActivity.class).add("atTime",atTime).send();
                     lightOff();
                 }
 
@@ -375,25 +386,25 @@ public class Manager extends Service {
                 // CLOSE APP & SERVICE
             else if (msg.equals("application_timeout") || msg.equals("application_stop")) stopApp();
 
+                // STANDBY APP
+            else if (msg.equals("application_standby")) standbyApp();
+
                 // DISPLAY NOTIFICATION
             else if (msg.equals("application_need_attention")) {
                 clearNotification();
                 if (intent.getStringExtra("action").equals("play")) notifyEvent();
             }
 
-                // DISPLAY NOTIFICATION
-            else if (msg.equals("application_standby")) clearNotification();
-
-                // MAJOR VERSION OUTDATED
+            // MAJOR VERSION OUTDATED
             else if (msg.equals("version_major_outdated")) setMode(MODE_BROKEN);
 
                 // MINOR VERSION OUTDATED
             else if (msg.equals("version_minor_outdated")) advertiseUpdate();
 
-            // UPDATE STATE
+                // UPDATE STATE
             else if (msg.equals("update_state")) setState(intent.getIntExtra("state", STATE_INIT));
 
-            // REGISTRATION
+                // REGISTRATION
             else if (msg.equals("do_register")) remoteControl.registrationReady(true);
 
         }

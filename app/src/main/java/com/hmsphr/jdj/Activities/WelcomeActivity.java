@@ -1,11 +1,9 @@
 package com.hmsphr.jdj.Activities;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.text.Html;
@@ -20,26 +18,20 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.hmsphr.jdj.BuildConfig;
 import com.hmsphr.jdj.Class.ManagedActivity;
 import com.hmsphr.jdj.Class.Utils.Show;
 import com.hmsphr.jdj.Class.Utils.ShowList;
-import com.hmsphr.jdj.Components.RemoteControl;
 import com.hmsphr.jdj.R;
 import com.hmsphr.jdj.Services.Manager;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
 
 public class WelcomeActivity extends ManagedActivity {
 
     protected static Class myClass = WelcomeActivity.class;
 
-    protected FrameLayout dialogBox;
+    protected FrameLayout updateBox;
     protected FrameLayout registerBox;
+    protected FrameLayout updateBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,13 +40,50 @@ public class WelcomeActivity extends ManagedActivity {
 
         MODE = Manager.MODE_WELCOME;
 
-        // Dialog Handler
-        dialogBox = (FrameLayout) findViewById(R.id.dialogBox);
-        dialogBox.setVisibility(View.GONE);
+        // Update Handler
+        updateBox = (FrameLayout) findViewById(R.id.updateBox);
+        updateBox.setVisibility(View.GONE);
 
         // Register Handler
         registerBox = (FrameLayout) findViewById(R.id.registerBox);
         registerBox.setVisibility(View.GONE);
+
+        // Update Handler
+        updateBar = (FrameLayout) findViewById(R.id.updateBar);
+        updateBar.setVisibility(View.GONE);
+
+        // Set version number
+        ((TextView) findViewById(R.id.versionText)).setText(BuildConfig.VERSION_NAME);
+
+        // Exit Button
+        Button menuExit = (Button) findViewById(R.id.menuExit);
+        menuExit.setTypeface(this.defaultFont);
+        menuExit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mail("application_standby").to(Manager.class).send();
+            }
+        });
+
+        // Info Button
+        Button menuInfo = (Button) findViewById(R.id.menuInfo);
+        menuInfo.setTypeface(this.defaultFont);
+        menuInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                displayInfo();
+            }
+        });
+
+        // Settings Button
+        Button menuSettings = (Button) findViewById(R.id.menuSettings);
+        menuSettings.setTypeface(this.defaultFont);
+        menuSettings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertRegister();
+            }
+        });
 
     }
 
@@ -108,52 +137,72 @@ public class WelcomeActivity extends ManagedActivity {
         }
     }
 
-    void alertExpired(boolean majorBreak) {
+    void displayInfo() {
+        // TODO : show INFO Page
+    }
+
+    void alertExpired(final boolean majorBreak) {
 
         Log.d("WELCOME-activity", "BROKEN VERSION !");
-        // TODO: Bouton de redirection vers Google Play
 
-        // Get Widgets
-        Button dialogOK = (Button) findViewById(R.id.dialogOK);
-        TextView dialogTitle = (TextView) findViewById(R.id.dialogTitle);
-        dialogTitle.setTypeface(this.defaultFont);
-        TextView dialogText = (TextView) findViewById(R.id.dialogText);
-        dialogText.setTypeface(this.defaultFont);
+        // Update Bar
+        updateBar.setVisibility(View.GONE);
+        updateBar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alertExpired(majorBreak);
+            }
+        });
+
+        // Go to Google Play Button
+        Button updateGO = (Button) findViewById(R.id.updateGO);
+        updateGO.setTypeface(this.defaultFont);
+        updateGO.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateBar.setVisibility(View.VISIBLE);
+                updateBox.setVisibility(View.GONE);
+                final String appPackageName = getPackageName(); // getPackageName() from Context or Activity object
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                } catch (android.content.ActivityNotFoundException anfe) {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                }
+            }
+        });
+
+        // Cancel Button
+        Button updateCANCEL = (Button) findViewById(R.id.updateCANCEL);
+        updateCANCEL.setTypeface(this.defaultFont);
+        updateCANCEL.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateBar.setVisibility(View.VISIBLE);
+                updateBox.setVisibility(View.GONE);
+            }
+        });
+        if (majorBreak) updateCANCEL.setVisibility(View.GONE);
+        else updateCANCEL.setVisibility(View.VISIBLE);
+
+        // Fonts
+        TextView updateTitle = (TextView) findViewById(R.id.updateTitle);
+        updateTitle.setTypeface(this.defaultFont);
+        TextView updateText = (TextView) findViewById(R.id.updateText);
+        updateText.setTypeface(this.defaultFont);
+        TextView updateBarText = (TextView) findViewById(R.id.updateBarText);
+        updateBarText.setTypeface(this.defaultFont);
 
         // Set Alpha Background (API 10 compat)
-        FrameLayout dialogOverlay = (FrameLayout) findViewById(R.id.dialogOverlay);
+        FrameLayout dialogOverlay = (FrameLayout) findViewById(R.id.updateOverlay);
         AlphaAnimation animation = new AlphaAnimation(0.6f, 0.6f);
         animation.setDuration(0);
         animation.setFillAfter(true);
         dialogOverlay.startAnimation(animation);
 
-        if (majorBreak) {
-            dialogTitle.setText(getResources().getString(R.string.expired_title));
-            dialogText.setText(Html.fromHtml("<b>"+getResources().getString(R.string.expired_text1)+"<br /><br />"
-                    +getResources().getString(R.string.expired_text2)+"<br /><br />"
-                    +getResources().getString(R.string.expired_bye)+"</font>"));
-            dialogOK.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mail("application_stop").to(Manager.class).send();
-                }
-            });
-        }
-        else {
-            dialogTitle.setText(getResources().getString(R.string.updatable_title));
-            dialogText.setText(Html.fromHtml("<b>"+getResources().getString(R.string.updatable_text1)+"<br /><br />"
-                    +getResources().getString(R.string.updatable_text2)+"<br /><br />"
-                    +getResources().getString(R.string.updatable_bye)+"</font>"));
-            dialogOK.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialogBox.setVisibility(View.GONE);
-                }
-            });
-        }
 
-        dialogBox.setVisibility(View.VISIBLE);
+        //mail("application_stop").to(Manager.class).send();
 
+        updateBox.setVisibility(View.VISIBLE);
     }
 
     void alertRegister() {

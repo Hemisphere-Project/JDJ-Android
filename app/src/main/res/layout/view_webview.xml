@@ -8,14 +8,23 @@
     tools:context="com.hmsphr.jdj.Activities.WebActivity"
     android:background="#000000">
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <WebView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/playerWEB" />
 
-        <WebView
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:id="@+id/playerWEB" />
-    </LinearLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/loadShutter"
+        android:background="#000000" >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView6"
+            android:src="@drawable/ic_notifsmall"
+            android:layout_gravity="center" />
+    </FrameLayout>
+
 </RelativeLayout>

@@ -8,18 +8,28 @@
     tools:context="com.hmsphr.jdj.Activities.WebActivity"
     android:background="#000000">
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/playerTEXT"
+        android:background="@android:color/black"
+        android:textColor="@android:color/white"
+        android:padding="15dp"
+        android:textSize="20dp"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
 
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:id="@+id/playerTEXT"
-            android:background="@android:color/black"
-            android:textColor="@android:color/white"
-            android:padding="15dp"
-            android:textSize="20dp" />
-    </LinearLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/loadShutter"
+        android:background="#000000" >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView5"
+            android:src="@drawable/ic_notifsmall"
+            android:layout_gravity="center" />
+    </FrameLayout>
 </RelativeLayout>

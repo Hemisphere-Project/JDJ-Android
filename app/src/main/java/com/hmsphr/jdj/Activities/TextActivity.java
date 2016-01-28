@@ -2,6 +2,7 @@ package com.hmsphr.jdj.Activities;
 
 import android.os.Bundle;
 import android.webkit.WebView;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.hmsphr.jdj.Class.MediaActivity;
@@ -19,7 +20,7 @@ public class TextActivity extends MediaActivity {
         // Configure WebView
         TextView txtArea = (TextView) findViewById(R.id.playerTEXT);
         txtArea.setTypeface(this.defaultFont);
-        player = new TextPlayer(this, txtArea );
+        player = new TextPlayer(this, txtArea, (FrameLayout) findViewById(R.id.loadShutter));
 
         // Transfer first intent
         onNewIntent(getIntent());

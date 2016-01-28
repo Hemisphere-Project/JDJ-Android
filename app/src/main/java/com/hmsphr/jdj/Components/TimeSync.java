@@ -41,6 +41,11 @@ public class TimeSync extends ThreadComponent {
         return (timestamp - timePool.getTimeMilliSynced());
     }
 
+    // translate server timestamp to local timestamp
+    public long translateToLocal(long ts) {
+        return ts - timePool.getTimeShift();
+    }
+
     protected void connect() {
         // Connect time server
         try {

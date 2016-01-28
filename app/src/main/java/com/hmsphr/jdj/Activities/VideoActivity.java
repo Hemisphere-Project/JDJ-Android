@@ -22,30 +22,34 @@ public class VideoActivity extends MediaActivity {
         super.onCreate(savedInstanceState);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
+        //if (false)
         {
             // Configure HLS movie player
             setContentView(R.layout.view_exoplayer);
-            player = new MediaPlayerExo(this, (AspectRatioFrameLayout) findViewById(R.id.videoView),
+            player = new MediaPlayerExo(this,
+                    (AspectRatioFrameLayout) findViewById(R.id.videoView),
                     (SurfaceView) findViewById(R.id.videoSurface),
-                    (SubtitleLayout) findViewById(R.id.subtitlesView));
+                    (ImageView) findViewById(R.id.audioShutter),
+                    (FrameLayout) findViewById(R.id.loadShutter));
             info("ExoPlayer started");
         }
         else
         {
             // Configure Classic MediaPlayerCommon
             setContentView(R.layout.view_classicplayer);
-            player = new MediaPlayerClassic(this, (VideoView) findViewById(R.id.videoView));
+            player = new MediaPlayerClassic(this,
+                                (VideoView) findViewById(R.id.videoView),
+                                (ImageView) findViewById(R.id.audioShutter),
+                                (FrameLayout) findViewById(R.id.loadShutter));
             info("ClassicPlayer started");
         }
 
         // Set Replay menu
-        player.setReplayMenu(
+        player.setReplay(
                 (FrameLayout) findViewById(R.id.replayShutter),
                 (FrameLayout) findViewById(R.id.replayOverlay),
                 (ImageButton) findViewById(R.id.replayBtn));
 
-        // Set Audio Shutter
-        player.setAudioShutter((ImageView) findViewById(R.id.audioShutter));
 
         // Transfer first intent
         onNewIntent(getIntent());

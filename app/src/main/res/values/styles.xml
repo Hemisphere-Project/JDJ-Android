@@ -37,4 +37,12 @@
         <item name="android:textSize">20dp</item>
     </style>
 
+    <!-- Buttons -->
+    <style name="ButtonJDJ" parent="Base.Widget.AppCompat.Button">
+        <item name="android:textColor">#DDDDDD</item>
+        <item name="android:background">#222222</item>
+        <item name="android:layout_margin">5dp</item>
+        <item name="android:padding">1dp</item>
+    </style>
+
 </resources>

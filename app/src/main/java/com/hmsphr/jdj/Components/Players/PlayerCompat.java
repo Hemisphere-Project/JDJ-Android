@@ -9,23 +9,15 @@ import android.widget.ImageView;
  */
 public interface PlayerCompat {
 
-    public void load(String url);
-
     public void play();
+    public void play(String s);
+    public void play(String s, long atTime);
 
     public void resume();
-
     public void pause();
-
     public void stop();
-
     public void hide();
 
-    public void setAudioShutter(ImageView audioS);
-    public void showAudioShutter();
-    public void hideAudioShutter();
-
-    public void setReplayMenu(FrameLayout replayV, FrameLayout replayO, ImageButton replayB);
-    public void enableReplay();
-    public void disableReplay();
+    public void setMode(String m);
+    public void setReplay(FrameLayout replayV, FrameLayout replayO, ImageButton replayB);
 }

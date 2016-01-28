@@ -2,66 +2,70 @@ package com.hmsphr.jdj.Components.Players;
 
 
 import android.app.Activity;
-import android.content.pm.ActivityInfo;
-import android.util.Log;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.view.View;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 public class TextPlayer implements PlayerCompat {
 
     private Activity context;
     private TextView myTextView;
+    private String mode;
     private String content;
+    private FrameLayout loadShutter;
 
-    /** WEBCLIENT: disable navigation **/
-    private class ProtectedViewClient extends WebViewClient {
-
-    }
-
-    public TextPlayer(Activity ctx, TextView view) {
-
+    public TextPlayer(Activity ctx, TextView view, FrameLayout shutter) {
         context = ctx;
         myTextView = view;
-    }
+        loadShutter = shutter;
 
-    public void load(String txt) {
-        myTextView.setText(txt);
+        //loadShutter.setVisibility(View.VISIBLE);
+        loadShutter.setVisibility(View.GONE);
     }
 
     public void play() {
-        myTextView.setVisibility(View.VISIBLE);
+        play(content);
     }
 
-    public void stop() {
-        hide();
+    public void play(String txt) {
+        play(txt, 0);
     }
 
+    public void play(String txt, long atTime) {
+        stop();
+        content = txt;
+        //myTextView.setText(content);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //loadShutter.setVisibility(View.GONE);
+                myTextView.setText(content);
+            }
+        }, Math.max(0, atTime - SystemClock.elapsedRealtime()));
+    }
+
+    public void stop() { hide(); }
 
     public void resume()
     {
         play();
     }
 
-    public void pause()
-    {
+    public void pause() {
         stop();
     }
 
     public void hide() {
-        myTextView.setVisibility(View.GONE);
+        //loadShutter.setVisibility(View.VISIBLE);
+        myTextView.setText("");
     }
 
     // UNUSED INTERFACE
-    public void setAudioShutter(ImageView audioS) {}
-    public void showAudioShutter() {}
-    public void hideAudioShutter() {}
-    public void setReplayMenu(FrameLayout replayV, FrameLayout replayO, ImageButton replayB) {}
-    public void enableReplay() {}
-    public void disableReplay() {}
+    public void setMode(String m) { mode = m; }
+    public void setReplay(FrameLayout replayV, FrameLayout replayO, ImageButton replayB) {}
 
 }

@@ -2,6 +2,8 @@ package com.hmsphr.jdj.Class;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
@@ -14,6 +16,7 @@ import com.hmsphr.jdj.Class.ManagedActivity;
 import com.hmsphr.jdj.Components.Players.MediaPlayerClassic;
 import com.hmsphr.jdj.Components.Players.MediaPlayerExo;
 import com.hmsphr.jdj.Components.Players.PlayerCompat;
+import com.hmsphr.jdj.Components.TimeSync;
 import com.hmsphr.jdj.R;
 import com.hmsphr.jdj.Services.Manager;
 
@@ -24,6 +27,7 @@ public class MediaActivity extends ManagedActivity {
 
     // internal Player
     protected PlayerCompat player = null;
+    protected boolean activityActive = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,25 +45,41 @@ public class MediaActivity extends ManagedActivity {
             String action = intent.getStringExtra("message");
             String payload = intent.getStringExtra("payload");
             String mode = intent.getStringExtra("mode");
+            long atTime = intent.getLongExtra("atTime", 0);
 
-            // Shutter mode AUDIO
-            if (mode != null && mode.equals("audio")) player.showAudioShutter();
-            else player.hideAudioShutter();
-
-            // Execute command
             // STOP
-            if (action.equals("stop")) {
-                player.stop();
-                finish();
-            }
+            if (action.equals("stop")) doStop(atTime);
 
             // PLAY
             else if (action.equals("play")) {
+
+                // Check PAYLOAD
                 if (payload == null) {error("Play action must provide a payload");  return;}
-                player.load(payload);
-                player.play();
+
+                // Set player mode
+                player.setMode(mode);
+
+                // Play MEDIA
+                player.play(payload, atTime);
             }
+
         }
+    }
+
+    private void waitFor(long timestamp) {
+        if (timestamp - SystemClock.elapsedRealtime() < 1000)
+            while(timestamp > SystemClock.elapsedRealtime()) ;
+    }
+
+    private void doStop(long atTime) {
+        // Sync with atTime
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                player.stop();
+                finish();
+            }
+        }, Math.max(0, atTime - SystemClock.elapsedRealtime()));
     }
 
     // Fullscreen
@@ -67,13 +87,13 @@ public class MediaActivity extends ManagedActivity {
     protected void onResume() {
         super.onResume();
         // Player resume
-        if (player != null) player.resume();
+        //if (player != null) player.resume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (player != null) player.pause();
+        //if (player != null) player.pause();
     }
 
     @Override

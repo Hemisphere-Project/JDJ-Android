@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 
 /**
@@ -14,6 +16,7 @@ public class Mailbox {
     private Context context;
     private String message;
     private Class destination;
+    private long timestamp = 0;
 
     public Mailbox() { }
     public Mailbox put(String msg)  {
@@ -29,9 +32,19 @@ public class Mailbox {
         intent = new Intent(context, cls);
         if (isActivity()) intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra("message", message);
+        intent.putExtra("from", context.getClass());
+        return this;
+    }
+    public Mailbox at(long ts) {
+        if (ts > 0) timestamp = ts;
+        else timestamp = 0;
         return this;
     }
     public Mailbox add(String key, int value) {
+        intent.putExtra(key, value);
+        return this;
+    }
+    public Mailbox add(String key, long value) {
         intent.putExtra(key, value);
         return this;
     }
@@ -44,10 +57,28 @@ public class Mailbox {
         return this;
     }
     public void send() {
-        Log.d("Mailbox", "Message posted from: "+context.getClass().toString()+" To: " + destination.getSuperclass());
+
+        // Timestamp
+        this.add("_timestamp", timestamp);
+
+        if (timestamp > SystemClock.elapsedRealtime()) {
+            Log.d("jdj-Mailbox", "delayed message: " + (timestamp - SystemClock.elapsedRealtime()));
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    doSend();
+                }
+            }, Math.max(0, timestamp - SystemClock.elapsedRealtime()));
+        }
+        else doSend();
+
+    }
+
+    private void doSend() {
+        Log.d("jdj-Mailbox", "Message posted from: " + context.getClass() + " To: " + destination.getSuperclass() + " :: " + message);
         if (isActivity()) context.startActivity(intent);
         else if (isService()) context.startService(intent);
-        else Log.e("Mailbox", "Unknown destination");
+        else Log.e("jdj-Mailbox", "Unknown destination");
     }
 
     private boolean isActivity() {

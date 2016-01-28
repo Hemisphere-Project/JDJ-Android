@@ -6,6 +6,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
@@ -18,12 +20,6 @@ import com.google.android.exoplayer.AspectRatioFrameLayout;
 import com.google.android.exoplayer.ExoPlayer;
 import com.google.android.exoplayer.audio.AudioCapabilities;
 import com.google.android.exoplayer.audio.AudioCapabilitiesReceiver;
-import com.google.android.exoplayer.metadata.GeobMetadata;
-import com.google.android.exoplayer.metadata.PrivMetadata;
-import com.google.android.exoplayer.metadata.TxxxMetadata;
-import com.google.android.exoplayer.text.CaptionStyleCompat;
-import com.google.android.exoplayer.text.Cue;
-import com.google.android.exoplayer.text.SubtitleLayout;
 import com.google.android.exoplayer.util.Util;
 import com.hmsphr.jdj.Components.Players.ExoPlayer.EventLogger;
 import com.hmsphr.jdj.Components.Players.ExoPlayer.ExPlayer;
@@ -34,20 +30,28 @@ import com.hmsphr.jdj.Components.Players.ExoPlayer.HlsRendererBuilder;
 import java.util.List;
 import java.util.Map;
 
-public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.Listener,
-        ExPlayer.Listener, ExPlayer.CaptionListener, ExPlayer.Id3MetadataListener {
+public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.Listener, ExPlayer.Listener {
 
     private AspectRatioFrameLayout videoFrame;
     private SurfaceView surfaceView;
-    private SubtitleLayout subtitleLayout;
+    private ImageView audioShutter;
+    private FrameLayout loadShutter;
 
     private ExPlayer player;
     private boolean playerNeedsPrepare;
     private long playerPosition;
-    private EventLogger eventLogger;
     private boolean audioRegistered = false;
 
-    private ImageView audioShutter;
+    private String mode;
+
+    public static final int STATE_STOP = 0;
+    public static final int STATE_LOAD = 1;
+    public static final int STATE_READY = 2;
+    public static final int STATE_PLAY = 3;
+    private int playerState = STATE_STOP;
+
+    private EventLogger eventLogger;
+    private boolean exoLog = false;
 
     private FrameLayout replayShutter;
     private FrameLayout replayOverlay;
@@ -65,93 +69,81 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
     public static final int TYPE_OTHER = 3;
 
 
-    public MediaPlayerExo(Activity ctx, AspectRatioFrameLayout frameV, SurfaceView surfaceV, SubtitleLayout subsV) {
+
+
+    public MediaPlayerExo(Activity ctx, AspectRatioFrameLayout frameV, SurfaceView surfaceV, ImageView aview, FrameLayout shutter) {
         context = ctx;
         videoFrame = frameV;
         surfaceView = surfaceV;
-        subtitleLayout = subsV;
         audioCapabilitiesReceiver = new AudioCapabilitiesReceiver(context, this);
+        audioShutter = aview;
+        loadShutter = shutter;
+
+        loadShutter.setVisibility(View.VISIBLE);
     }
 
-    public void setAudioShutter(ImageView audioS) {
-        audioShutter = audioS;
+    // Replay last file
+    public void play() {
+        if (replayEnable) replayShutter.setVisibility(View.GONE);
+        if (playerState == STATE_PLAY) player.seekTo(0);
+        else play(contentUri.toString());
     }
 
-    public void showAudioShutter() {
-        if (audioShutter != null) audioShutter.setVisibility(View.VISIBLE);
+    // Play file now
+    public void play(String url) {
+        play(url, 0);
     }
 
-    public void hideAudioShutter() {
-        if (audioShutter != null) audioShutter.setVisibility(View.GONE);
+    // PLAY
+    public void play(String url, long atTime) {
+        stop();
+
+        contentUri = Uri.parse(url);
+        if (url.endsWith("m3u8")) contentType = TYPE_HLS;
+        else contentType = TYPE_OTHER;
+
+        launchPlayer(atTime);
+        grabAudio();
     }
 
-    public void setReplayMenu(FrameLayout replayV, FrameLayout replayO, ImageButton replayB) {
+    public void resume() {
+        if (playerPosition > 0) {
+            launchPlayer();
+            grabAudio();
+            Log.d("jdj-ExoPlayer", "Player RESUME");
+        }
+    }
+
+    public void pause() {
+        releaseAudio();
+        releasePlayer(true);
+        Log.d("jdj-ExoPlayer", "Player PAUSED at " + playerPosition);
+    }
+
+    public void stop() {
+        releaseAudio();
+        releasePlayer(false);
+    }
+
+    public void hide() {
+        pause();
+    }
+
+    public void setMode(String m) {
+        mode = m;
+    }
+
+    public void setReplay(FrameLayout replayV, FrameLayout replayO, ImageButton replayB) {
         replayShutter = replayV;
         replayOverlay = replayO;
         replayBtn = replayB;
-
-        // Replay Shutter action
         replayBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 play();
             }
         });
-
-        replayEnable = true;
-    }
-
-    public void enableReplay() {
         if (replayShutter != null) replayEnable = true;
-    }
-
-    public void disableReplay() {
-        if (replayShutter != null) replayShutter.setVisibility(View.GONE);
-        replayEnable = false;
-    }
-
-    public void load(String url) {
-        contentUri = Uri.parse(url);
-        if (url.endsWith("m3u8")) contentType = TYPE_HLS;
-        else contentType = TYPE_OTHER;
-    }
-
-    public void play()
-    {
-        stop();
-        if (replayEnable) replayShutter.setVisibility(View.GONE);
-        resume();
-    }
-
-    public void resume()
-    {
-        audioCapabilitiesReceiver.register();
-        audioRegistered = true;
-        preparePlayer();
-        configureSubtitleView();
-        videoFrame.setVisibility(View.VISIBLE);
-        context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-    }
-
-    public void pause()
-    {
-        releasePlayer();
-        if (audioRegistered)
-        {
-            audioCapabilitiesReceiver.unregister();
-            audioRegistered = false;
-        }
-    }
-
-    public void stop() {
-        hide();
-        playerPosition = 0;
-        Log.v("mgrlog", "Player stopped..");
-    }
-
-    public void hide() {
-        videoFrame.setVisibility(View.GONE);
-        pause();
     }
 
     // AudioCapabilitiesReceiver.Listener methods
@@ -160,13 +152,12 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
         boolean audioCapabilitiesChanged = !audioCapabilities.equals(this.audioCapabilities);
         if (player == null || audioCapabilitiesChanged) {
             this.audioCapabilities = audioCapabilities;
-            releasePlayer();
-            preparePlayer();
+            //releasePlayer(true);
+            //launchPlayer();
         } else if (player != null) {
             player.setBackgrounded(false);
         }
     }
-
 
     // Internal methods
     private RendererBuilder getRendererBuilder() {
@@ -181,44 +172,87 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
         }
     }
 
-    private void preparePlayer() {
+    private void launchPlayer() {
+        launchPlayer(0);
+    }
+
+    private void launchPlayer(long atTime) {
+        Log.d("jdj-ExoPlayer", "Player LOADING at"+atTime);
+        playerState = STATE_LOAD;
+        //context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        if (mode != null && mode.equals("audio"))
+            audioShutter.setVisibility(View.VISIBLE);
+
         if (player == null) {
             player = new ExPlayer(getRendererBuilder());
             player.addListener(this);
-            player.setCaptionListener(this);
-            player.setMetadataListener(this);
             player.seekTo(playerPosition);
-            Log.v("mgrlog", "seek to position: " + playerPosition);
             playerNeedsPrepare = true;
-            // mediaController.setMediaPlayer(player.getPlayerControl());
-            // mediaController.setEnabled(true);
-            eventLogger = new EventLogger();
-            eventLogger.startSession();
-            player.addListener(eventLogger);
-            player.setInfoListener(eventLogger);
-            player.setInternalErrorListener(eventLogger);
+            if (exoLog) {
+                eventLogger = new EventLogger();
+                eventLogger.startSession();
+                player.addListener(eventLogger);
+                player.setInfoListener(eventLogger);
+                player.setInternalErrorListener(eventLogger);
+            }
         }
         if (playerNeedsPrepare) {
             player.prepare();
             playerNeedsPrepare = false;
         }
         player.setSurface(surfaceView.getHolder().getSurface());
-        player.setPlayWhenReady(true);
+        player.setPlayWhenReady(false);
+
+        // Sync with atTime
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (playerState == STATE_STOP) return;
+
+                else if (playerState >= STATE_READY) {
+                    Log.d("jdj-ExoPlayer", "Player PLAY - SYNC");
+                    loadShutter.setVisibility(View.GONE);
+                }
+                else Log.d("jdj-ExoPlayer", "Player PLAY - OUT OF SYNC.. (not ready yet)");
+
+                player.setPlayWhenReady(true);
+                playerState = STATE_PLAY;
+            }
+        }, Math.max(0, atTime - SystemClock.elapsedRealtime()));
     }
 
-    private void releasePlayer() {
+    private void releasePlayer(boolean savePosition) {
+        playerState = STATE_STOP;
+        Log.d("jdj-ExoPlayer", "Player STOP");
         if (player != null) {
-            playerPosition = player.getCurrentPosition();
+            if (savePosition) playerPosition = player.getCurrentPosition();
+            else playerPosition = 0;
             player.release();
             player = null;
-            eventLogger.endSession();
-            eventLogger = null;
+            if (exoLog) {
+                eventLogger.endSession();
+                eventLogger = null;
+            }
         }
+        if (!savePosition) {
+            loadShutter.setVisibility(View.VISIBLE);
+            audioShutter.setVisibility(View.GONE);
+        }
+        if (replayEnable) replayShutter.setVisibility(View.GONE);
     }
 
     public void onPlaybackEnd() {
-        Log.i("jdj-MoviePlayer", ("Media did reach end "));
+        Log.d("jdj-ExoPlayer", "Player END");
+        playerState = STATE_STOP;
         if (replayEnable) replayShutter.setVisibility(View.VISIBLE);
+        // LOOP
+        // player.seekTo(0);
+    }
+
+    public void onPlaybackReady() {
+        Log.d("jdj-ExoPlayer", "Player READY");
+        if (playerState == STATE_LOAD) playerState = STATE_READY;
+        else if (playerState == STATE_PLAY) loadShutter.setVisibility(View.GONE);
     }
 
     // DemoPlayer.Listener implementation
@@ -226,11 +260,14 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
     @Override
     public void onStateChanged(boolean playWhenReady, int playbackState) {
 
-        // LOOP
-        //if (playbackState == ExoPlayer.STATE_ENDED) player.seekTo(0);
+        // PLAYER LOADED
+        if (playbackState == ExoPlayer.STATE_READY) onPlaybackReady();
+
+        // PLAYER END
         if (playbackState == ExoPlayer.STATE_ENDED) onPlaybackEnd();
 
-        String text = "playWhenReady=" + playWhenReady + ", playbackState=";
+
+/*        String text = "playWhenReady=" + playWhenReady + ", playbackState=";
         switch(playbackState) {
             case ExoPlayer.STATE_BUFFERING:
                 text += "buffering";
@@ -251,77 +288,35 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
                 text += "unknown";
                 break;
         }
-        Log.i("jdj-MoviePlayer", ("Video Player "+text));
+        Log.i("jdj-MoviePlayer", ("Video Player "+text));*/
+    }
+
+    public void grabAudio() {
+        if (!audioRegistered) {
+            audioCapabilitiesReceiver.register();
+            audioRegistered = true;
+        }
+    }
+
+    public void releaseAudio() {
+        if (audioRegistered) {
+            audioCapabilitiesReceiver.unregister();
+            audioRegistered = false;
+        }
     }
 
     @Override
     public void onError(Exception e) {
+        Log.d("jdj-ExoPlayer", "Player ERROR");
         playerNeedsPrepare = true;
+        grabAudio();
+        launchPlayer();
     }
 
     @Override
     public void onVideoSizeChanged(int width, int height, float pixelWidthAspectRatio) {
         videoFrame.setAspectRatio(
                 height == 0 ? 1 : (width * pixelWidthAspectRatio) / height);
-    }
-
-    // DemoPlayer.CaptionListener implementation
-
-    @Override
-    public void onCues(List<Cue> cues) {
-        subtitleLayout.setCues(cues);
-    }
-
-    // DemoPlayer.MetadataListener implementation
-
-    @Override
-    public void onId3Metadata(Map<String, Object> metadata) {
-        for (Map.Entry<String, Object> entry : metadata.entrySet()) {
-            if (TxxxMetadata.TYPE.equals(entry.getKey())) {
-                TxxxMetadata txxxMetadata = (TxxxMetadata) entry.getValue();
-                Log.i("jdj-MoviePlayer", String.format("ID3 TimedMetadata %s: description=%s, value=%s",
-                        TxxxMetadata.TYPE, txxxMetadata.description, txxxMetadata.value));
-            } else if (PrivMetadata.TYPE.equals(entry.getKey())) {
-                PrivMetadata privMetadata = (PrivMetadata) entry.getValue();
-                Log.i("jdj-MoviePlayer", String.format("ID3 TimedMetadata %s: owner=%s",
-                        PrivMetadata.TYPE, privMetadata.owner));
-            } else if (GeobMetadata.TYPE.equals(entry.getKey())) {
-                GeobMetadata geobMetadata = (GeobMetadata) entry.getValue();
-                Log.i("jdj-MoviePlayer", String.format("ID3 TimedMetadata %s: mimeType=%s, filename=%s, description=%s",
-                        GeobMetadata.TYPE, geobMetadata.mimeType, geobMetadata.filename,
-                        geobMetadata.description));
-            } else {
-                Log.i("jdj-MoviePlayer", String.format("ID3 TimedMetadata %s", entry.getKey()));
-            }
-        }
-    }
-
-    private void configureSubtitleView() {
-        CaptionStyleCompat captionStyle;
-        float captionFontScale;
-        if (Util.SDK_INT >= 19) {
-            captionStyle = getUserCaptionStyleV19();
-            captionFontScale = getUserCaptionFontScaleV19();
-        } else {
-            captionStyle = CaptionStyleCompat.DEFAULT;
-            captionFontScale = 1.0f;
-        }
-        subtitleLayout.setStyle(captionStyle);
-        subtitleLayout.setFontScale(captionFontScale);
-    }
-
-    @TargetApi(19)
-    private float getUserCaptionFontScaleV19() {
-        CaptioningManager captioningManager =
-                (CaptioningManager) context.getSystemService(Context.CAPTIONING_SERVICE);
-        return captioningManager.getFontScale();
-    }
-
-    @TargetApi(19)
-    private CaptionStyleCompat getUserCaptionStyleV19() {
-        CaptioningManager captioningManager =
-                (CaptioningManager) context.getSystemService(Context.CAPTIONING_SERVICE);
-        return CaptionStyleCompat.createFromCaptionStyle(captioningManager.getUserStyle());
     }
 
 }

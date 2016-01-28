@@ -468,6 +468,10 @@ public class RemoteControl extends ThreadComponent {
                 if (task.has("category")) msg.add("engine", task.getString("category"));
                 else msg.add("engine", "");
 
+                // ATTIME PARAMETER
+                if (task.has("atTime")) msg.add("atTime", task.getLong("atTime"));
+                else msg.add("atTime", 0);
+
                 // EXTRA PARAMETER
                 if (task.has("param1")) msg.add("param1", task.getString("param1"));
                 else msg.add("param1", "");

@@ -24,13 +24,13 @@
     <string name="on">[on]</string>
     <string name="failed">Playback failed</string>
 
-    <string name="welcome_connecting">Bienvenue !\n\nConnexion au serveur\nde Spectacle en cours..</string>
-    <string name="welcome_nonetwork">Aucune connexion au réseau..\n\nVérifiez que vous êtes connecté\nà internetvia Wifi ou 3G/4G !</string>
-    <string name="welcome_noserver">Impossible de joindre le serveur..\n\nVous serez alerté lorsque\nla communication sera rétablie.</string>
-    <string name="welcome_nouser">Vous devez vous inscrire\nà un spectacle..</string>
-    <string name="welcome_showpast">Le spectacle est terminé..\n\nMerci de nous avoir suivi !\nA bientôt pour de nouvelles aventures...</string>
-    <string name="welcome_showfuture">Le spectacle commencera bientôt !\n\nVous serez alerté en direct des évènements à venir..</string>
-    <string name="welcome_showtime">Bienvenue\n\nLe spectacle est en cours,\nrestez connecté ! </string>
+    <string name="welcome_connecting">Connexion au serveur de Spectacle en cours..</string>
+    <string name="welcome_nonetwork">Aucune connexion au réseau..\nVérifiez que vous êtes connecté à internetvia Wifi ou 3G/4G !</string>
+    <string name="welcome_noserver">Impossible de joindre le serveur..\nVous serez alerté lorsque la communication sera rétablie.</string>
+    <string name="welcome_nouser">Vous devez vous inscrire à un spectacle..</string>
+    <string name="welcome_showpast">Le spectacle est terminé..\nMerci de nous avoir suivi !</string>
+    <string name="welcome_showfuture">Le spectacle commencera bientôt !\nVous serez alerté en direct des évènements à venir..</string>
+    <string name="welcome_showtime">Le spectacle est en cours, restez connecté ! </string>
 
 
     <string name="expired_title">Version expirée :\'(</string>
@@ -38,10 +38,8 @@
     <string name="expired_text2">Merci de mettre à jour votre application via Google Play ou en la réinstallant manuellement.</string>
     <string name="expired_bye">A bientôt !</string>
 
-    <string name="updatable_title">Mise à jour disponible !</string>
-    <string name="updatable_text1">Une mise à jour est disponible pour l\'application.</string>
-    <string name="updatable_text2">Vous pouvez l\'appliquer depuis Google Play ou en la téléchargeant manuellement.</string>
-    <string name="updatable_bye">Bon spectacle !</string>
+    <string name="updatable_title">Mise à jour disponible</string>
+    <string name="updatable_text">Nous vous recommandons d\'appliquer cette mise à jour depuis Google Play pour profiter pleinement de l\'application.\n\nBon Spectacle !</string>
 
     <string name="register_title">Inscription</string>
     <string name="register_text1">Représentation:</string>
@@ -52,5 +50,6 @@
     <string name="audio_shutter">audio shutter</string>
     <string name="replay_shutter">replay shutter</string>
     <string name="replay">replay</string>
+    <string name="jdjLogo">JDJ Logo</string>
 
 </resources>
