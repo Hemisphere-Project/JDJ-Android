@@ -21,7 +21,7 @@ public class VideoActivity extends MediaActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
+        if (android.os.Build.VERSION.SDK_INT >= 16)
         //if (false)
         {
             // Configure HLS movie player

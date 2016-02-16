@@ -16,7 +16,6 @@ public interface PlayerCompat {
     public void resume();
     public void pause();
     public void stop();
-    public void hide();
 
     public void setMode(String m);
     public void setReplay(FrameLayout replayV, FrameLayout replayO, ImageButton replayB);

@@ -23,7 +23,10 @@ public class MediaPlayerClassic implements PlayerCompat {
 
     private Activity context;
     private Uri contentUri;
+    private String lastUrl;
     private int playerPosition;
+
+    private boolean resumeToPosition = false;
 
     private VideoView videoView;
     private MediaPlayer player;
@@ -67,8 +70,11 @@ public class MediaPlayerClassic implements PlayerCompat {
                 mp.setOnInfoListener(new MediaPlayer.OnInfoListener() {
                     @Override
                     public boolean onInfo(MediaPlayer mp, int what, int extra) {
-                        if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START)
+                        if (what == MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START) {
+                            Log.d("jdj-VideoClassic", "Player RENDERING ? "+what);
                             loadShutter.setVisibility(View.GONE);
+                        }
+
                         return true;
                     }
                 });
@@ -77,7 +83,7 @@ public class MediaPlayerClassic implements PlayerCompat {
                     @Override
                     public void onSeekComplete(MediaPlayer mp) {
                         videoView.start();
-                        Log.d("jdj-VideoClassic", "Player SEEK at" + playerPosition);
+                        Log.d("jdj-VideoClassic", "Player SEEK at " + playerPosition);
                     }
                 });
 
@@ -86,6 +92,11 @@ public class MediaPlayerClassic implements PlayerCompat {
                         playerState = STATE_STOP;
                         if (replayEnable) replayShutter.setVisibility(View.VISIBLE);
                         Log.d("jdj-VideoClassic", "Player END");
+
+                        if (resumeToPosition) {
+                            playerPosition = 0;
+                            Log.d("jdj-VideoClassic", "Player RESET");
+                        }
                     }
                 });
             }
@@ -106,6 +117,14 @@ public class MediaPlayerClassic implements PlayerCompat {
     public void play(String url, long atTime) {
         stop();
 
+        if (resumeToPosition) {
+            if (!url.equals(lastUrl)) {
+                playerPosition = 0;
+                Log.d("jdj-VideoClassic", "Player RESET");
+            }
+            lastUrl = url;
+        }
+
         contentUri = Uri.parse(url);
 
         Log.d("jdj-VideoClassic", "Player LOADING");
@@ -120,17 +139,25 @@ public class MediaPlayerClassic implements PlayerCompat {
             public void run() {
                 if (playerState == STATE_STOP) return;
 
-                else if (playerState >= STATE_READY) Log.d("jdj-VideoClassic", "Player PLAY - SYNC");
+                else if (playerState >= STATE_READY)
+                    Log.d("jdj-VideoClassic", "Player PLAY - SYNC");
                 else Log.d("jdj-VideoClassic", "Player PLAY - OUT OF SYNC.. (not ready yet)");
                 videoView.start();
+
+                if (resumeToPosition && playerPosition > 0) {
+                    videoView.seekTo(playerPosition);
+                    Log.d("jdj-VideoClassic", "Player RESUME at " + playerPosition);
+                }
+
                 playerState = STATE_PLAY;
+                if (android.os.Build.VERSION.SDK_INT < 17) loadShutter.setVisibility(View.GONE);
 
             }
         }, Math.max(0, atTime - SystemClock.elapsedRealtime()));
     }
 
     public void resume(){
-        if (player != null) {
+        if (player != null && playerPosition > 0) {
             videoView.seekTo(playerPosition);
             context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             Log.d("jdj-VideoClassic", "Player RESUME");
@@ -151,13 +178,9 @@ public class MediaPlayerClassic implements PlayerCompat {
         loadShutter.setVisibility(View.VISIBLE);
         audioShutter.setVisibility(View.GONE);
         if (replayEnable) replayShutter.setVisibility(View.GONE);
-        playerPosition = 0;
+        if (!resumeToPosition) playerPosition = 0;
         player = null;
         Log.d("jdj-VideoClassic", "Player STOP");
-    }
-
-    public void hide(){
-        pause();
     }
 
     public void setMode(String m) {
@@ -185,4 +208,5 @@ public class MediaPlayerClassic implements PlayerCompat {
 
         if (replayShutter != null) replayEnable = true;
     }
+
 }

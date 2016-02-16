@@ -123,10 +123,7 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
     public void stop() {
         releaseAudio();
         releasePlayer(false);
-    }
-
-    public void hide() {
-        pause();
+        Log.d("jdj-ExoPlayer", "Player STOPPED");
     }
 
     public void setMode(String m) {
@@ -223,10 +220,10 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
 
     private void releasePlayer(boolean savePosition) {
         playerState = STATE_STOP;
-        Log.d("jdj-ExoPlayer", "Player STOP");
+        //Log.d("jdj-ExoPlayer", "Player STOP");
+        playerPosition = 0;
         if (player != null) {
             if (savePosition) playerPosition = player.getCurrentPosition();
-            else playerPosition = 0;
             player.release();
             player = null;
             if (exoLog) {

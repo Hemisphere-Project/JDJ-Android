@@ -74,8 +74,7 @@ public class WebPlayer implements PlayerCompat {
                 else if (playerState >= STATE_READY) {
                     Log.d("jdj-WebPlayer", "Player PLAY - SYNC");
                     loadShutter.setVisibility(View.GONE);
-                }
-                else Log.d("jdj-WebPlayer", "Player PLAY - OUT OF SYNC.. (not ready yet)");
+                } else Log.d("jdj-WebPlayer", "Player PLAY - OUT OF SYNC.. (not ready yet)");
 
                 playerState = STATE_PLAY;
             }
@@ -83,7 +82,7 @@ public class WebPlayer implements PlayerCompat {
     }
 
     public void stop() {
-        hide();
+        loadShutter.setVisibility(View.VISIBLE);
         //myWebView.loadUrl("about:blank");
         myWebView.loadDataWithBaseURL(null, "<html><head></head><body bgcolor=\"black\"></body></html>", "text/html", "utf-8", null);
         playerState = STATE_STOP;
@@ -98,10 +97,6 @@ public class WebPlayer implements PlayerCompat {
 
     public void pause() {
         stop();
-    }
-
-    public void hide() {
-        loadShutter.setVisibility(View.VISIBLE);
     }
 
     // UNUSED INTERFACE

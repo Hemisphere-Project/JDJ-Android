@@ -27,7 +27,6 @@ public class MediaActivity extends ManagedActivity {
 
     // internal Player
     protected PlayerCompat player = null;
-    protected boolean activityActive = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,11 +34,13 @@ public class MediaActivity extends ManagedActivity {
         MODE = Manager.MODE_PLAY;
     }
 
+
     // Intent with COMMAND
     @Override
     protected void onNewIntent (Intent intent) {
         super.onNewIntent(intent);
 
+        Log.e("jdj-MediaActivity", "Processing intent "+intent.getStringExtra("message"));
         // Check if player is available
         if (player != null) {
             String action = intent.getStringExtra("message");
@@ -48,10 +49,10 @@ public class MediaActivity extends ManagedActivity {
             long atTime = intent.getLongExtra("atTime", 0);
 
             // STOP
-            if (action.equals("stop")) doStop(atTime);
+            //if (action.equals("stop")) doStop(atTime);
 
             // PLAY
-            else if (action.equals("play")) {
+            if (action.equals("play")) {
 
                 // Check PAYLOAD
                 if (payload == null) {error("Play action must provide a payload");  return;}
@@ -62,7 +63,6 @@ public class MediaActivity extends ManagedActivity {
                 // Play MEDIA
                 player.play(payload, atTime);
             }
-
         }
     }
 
@@ -82,18 +82,18 @@ public class MediaActivity extends ManagedActivity {
         }, Math.max(0, atTime - SystemClock.elapsedRealtime()));
     }
 
-    // Fullscreen
     @Override
-    protected void onResume() {
-        super.onResume();
-        // Player resume
-        //if (player != null) player.resume();
+    public void onRestart() {
+        super.onRestart();
+        Log.e("jdj-MediaActivity", "Restart");
+        if (player != null) player.resume();
     }
+
 
     @Override
     public void onPause() {
         super.onPause();
-        //if (player != null) player.pause();
+        if (player != null) player.pause();
     }
 
     @Override

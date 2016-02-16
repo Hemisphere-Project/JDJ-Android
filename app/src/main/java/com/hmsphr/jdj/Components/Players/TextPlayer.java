@@ -48,7 +48,9 @@ public class TextPlayer implements PlayerCompat {
         }, Math.max(0, atTime - SystemClock.elapsedRealtime()));
     }
 
-    public void stop() { hide(); }
+    public void stop() {
+        myTextView.setText("");
+    }
 
     public void resume()
     {
@@ -57,11 +59,6 @@ public class TextPlayer implements PlayerCompat {
 
     public void pause() {
         stop();
-    }
-
-    public void hide() {
-        //loadShutter.setVisibility(View.VISIBLE);
-        myTextView.setText("");
     }
 
     // UNUSED INTERFACE
