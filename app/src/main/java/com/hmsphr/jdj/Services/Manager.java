@@ -329,7 +329,7 @@ public class Manager extends Service {
         // Process intents
         if (intent != null && intent.hasExtra("message")) {
             String msg = intent.getStringExtra("message");
-            Log.e("Manager", msg);
+            //Log.e("Manager", msg);
 
             // ACTIVITY RESUMED
             if (msg.equals("activity_connect")) {
