@@ -26,12 +26,12 @@
 
     </com.google.android.exoplayer.AspectRatioFrameLayout>
 
-    <ImageView
+    <pl.droidsonroids.gif.GifImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/audioShutter"
         android:visibility="gone"
-        android:src="@drawable/lyle_owerko2"
+        android:src="@drawable/radio2"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:background="@color/pitch_black"
