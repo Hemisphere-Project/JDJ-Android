@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.util.Log;
@@ -163,11 +164,14 @@ public class WelcomeActivity extends ManagedActivity {
                 updateBar.setVisibility(View.VISIBLE);
                 updateBox.setVisibility(View.GONE);
                 final String appPackageName = getPackageName(); // getPackageName() from Context or Activity object
+
+                if (majorBreak) mail("application_stop").to(Manager.class).send();
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
                 } catch (android.content.ActivityNotFoundException anfe) {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
                 }
+                if (majorBreak) finish();
             }
         });
 

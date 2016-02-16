@@ -79,7 +79,8 @@ public class RemoteControl extends ThreadComponent {
     // STATE
     private void setState(int state) {
         STATE = state;
-        mail("update_state").to(Manager.class).add("state", STATE).send();
+        if (isMyServiceRunning(Manager.class))
+            mail("update_state").to(Manager.class).add("state", STATE).send();
     }
 
     // CHECK NETWORK AVAILABILITY

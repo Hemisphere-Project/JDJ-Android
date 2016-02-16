@@ -26,6 +26,7 @@ import com.hmsphr.jdj.Components.RemoteControl;
 import com.hmsphr.jdj.Components.TimeSync;
 import com.hmsphr.jdj.R;
 
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -92,7 +93,7 @@ public class Manager extends Service {
 
     public void setMode(int mode) {
 
-        if (APP_MODE == mode) return;
+        if (APP_MODE == mode || APP_MODE == MODE_BROKEN) return;
 
         if (APP_MODE >= MODE_STANDBY)
         {
@@ -133,7 +134,11 @@ public class Manager extends Service {
     STOP APP
      */
     public void stopApp() {
+        Mailbox.enable = false;
         this.standbyApp();
+        remoteControl.stop();
+        //commander.stop();
+        clock.stop();
         this.stopSelf();
     }
 
@@ -314,9 +319,17 @@ public class Manager extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
 
+
+
+        if (APP_MODE == MODE_BROKEN) {
+            stopApp();
+            return START_NOT_STICKY;
+        }
+
         // Process intents
         if (intent != null && intent.hasExtra("message")) {
             String msg = intent.getStringExtra("message");
+            Log.e("Manager", msg);
 
             // ACTIVITY RESUMED
             if (msg.equals("activity_connect")) {
@@ -384,7 +397,10 @@ public class Manager extends Service {
             }
 
                 // CLOSE APP & SERVICE
-            else if (msg.equals("application_timeout") || msg.equals("application_stop")) stopApp();
+            else if (msg.equals("application_timeout") || msg.equals("application_stop")) {
+                stopApp();
+                return START_NOT_STICKY;
+            }
 
                 // STANDBY APP
             else if (msg.equals("application_standby")) standbyApp();
@@ -414,10 +430,8 @@ public class Manager extends Service {
 
     @Override
     public void onDestroy() {
-        remoteControl.stop();
-        //commander.stop();
-        clock.stop();
         Log.v("jdj-Manager", "Manager is closing.. Goodbye ! ");
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     /*

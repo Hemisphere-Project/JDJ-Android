@@ -1,6 +1,7 @@
 package com.hmsphr.jdj.Class;
 
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
@@ -31,6 +32,17 @@ abstract public class ThreadComponent {
     protected SharedPreferences settings() {
         return appContext.getSharedPreferences(
                 appContext.getString(R.string.settings_file), appContext.MODE_PRIVATE);
+    }
+
+    // SERVICE CHECK
+    protected boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) appContext.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // THREAD TOOLS

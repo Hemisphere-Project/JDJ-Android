@@ -51,6 +51,7 @@ public class ManagedActivity extends Activity {
     private final BroadcastReceiver exitsignal = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d("jdj-ManagedActivity", "exit signal received");
             finish();
         }
     };
@@ -60,6 +61,17 @@ public class ManagedActivity extends Activity {
     protected SharedPreferences settings() {
         return this.getSharedPreferences(
                 this.getString(R.string.settings_file), this.MODE_PRIVATE);
+    }
+
+    // SERVICE CHECK
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -116,7 +128,8 @@ public class ManagedActivity extends Activity {
         super.onStop();
 
         // Send DISCONNECT to Manager
-        mail("activity_disconnect").to(Manager.class).send();
+        if (isMyServiceRunning(Manager.class))
+            mail("activity_disconnect").to(Manager.class).send();
     }
 
 

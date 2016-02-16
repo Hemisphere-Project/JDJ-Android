@@ -12,6 +12,9 @@ import android.util.Log;
  * Created by mgr on 27/11/15.
  */
 public class Mailbox {
+
+    public static boolean enable = true;
+
     private Intent intent;
     private Context context;
     private String message;
@@ -75,6 +78,7 @@ public class Mailbox {
     }
 
     private void doSend() {
+        //if (!Mailbox.enable && isService()) return;
         Log.d("jdj-Mailbox", "Message posted from: " + context.getClass() + " To: " + destination.getSuperclass() + " :: " + message);
         if (isActivity()) context.startActivity(intent);
         else if (isService()) context.startService(intent);
