@@ -138,12 +138,34 @@
             android:layout_marginLeft="50dp"
             android:layout_marginRight="70dp" >
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/updatable_title"
-                android:id="@+id/updateTitle"
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:weightSum="1"
+                android:layout_marginBottom="10dp" >
+
+                <ImageView
+                    android:layout_width="35dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/imageView8"
+                    android:src="@drawable/ic_notifsmall" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:id="@+id/updateTitle"
+                    android:text="@string/updatable_title"
+                    android:textSize="30dp"
+                    android:layout_marginLeft="10dp" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#ffffff"
+                android:layout_weight="0.23"
                 android:layout_marginBottom="10dp" />
 
             <TextView
@@ -163,19 +185,24 @@
 
                 <Button
                     style="?android:attr/buttonStyleSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="136dp"
+                    android:layout_height="38dp"
                     android:text="Mettre à Jour"
                     android:id="@+id/updateGO"
-                    android:layout_gravity="right" />
+                    android:background="#FF494949"
+                    android:layout_marginLeft="10px"
+                    android:layout_marginRight="10px" />
 
                 <Button
                     style="?android:attr/buttonStyleSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="78dp"
+                    android:layout_height="38dp"
                     android:text="Ignorer"
                     android:id="@+id/updateCANCEL"
-                    android:layout_gravity="right" />
+                    android:layout_gravity="right"
+                    android:background="#FF494949"
+                    android:layout_marginLeft="10px"
+                    android:layout_marginRight="10px" />
             </LinearLayout>
 
         </LinearLayout>
@@ -185,8 +212,87 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/transparent"
-        android:id="@+id/registerBox"
+        android:id="@+id/infoBox"
         android:visibility="gone" >
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.6"
+            android:background="@android:color/black"
+            android:id="@+id/infoOverlay" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/dialogbox"
+            android:layout_gravity="center"
+            android:layout_centerInParent="true"
+            android:padding="10dp"
+            android:weightSum="1"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp" >
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:weightSum="1"
+                android:layout_marginBottom="10dp" >
+
+                <ImageView
+                    android:layout_width="35dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/imageView7"
+                    android:src="@drawable/ic_notifsmall" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:id="@+id/textView"
+                    android:text="@string/info_title"
+                    android:textSize="30dp"
+                    android:layout_marginLeft="10dp" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#ffffff"
+                android:layout_weight="0.23"
+                android:layout_marginBottom="10dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="@string/info_text"
+                android:id="@+id/infotext"
+                android:maxLines="10"
+                android:scrollIndicators="right" />
+
+            <Button
+                android:layout_width="65dp"
+                android:layout_height="27dp"
+                android:text="OK"
+                android:id="@+id/infoOK"
+                android:background="#FF494949"
+                android:textColor="#DDDDDD"
+                android:layout_gravity="right"
+                android:textAlignment="center"
+                android:layout_marginTop="20dp" />
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:id="@+id/registerBox"
+        android:visibility="visible" >
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -306,7 +412,7 @@
                 android:layout_height="27dp"
                 android:text="Enregistrer"
                 android:id="@+id/registerOK"
-                android:background="@android:color/black"
+                android:background="#FF494949"
                 android:textColor="#DDDDDD"
                 android:layout_gravity="center_horizontal"
                 android:textAlignment="center"

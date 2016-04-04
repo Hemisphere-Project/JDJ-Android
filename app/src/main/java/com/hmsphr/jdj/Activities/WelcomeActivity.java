@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.telephony.TelephonyManager;
 import android.text.Html;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -32,6 +33,7 @@ public class WelcomeActivity extends ManagedActivity {
 
     protected FrameLayout updateBox;
     protected FrameLayout registerBox;
+    protected FrameLayout infoBox;
     protected FrameLayout updateBar;
 
     @Override
@@ -48,6 +50,11 @@ public class WelcomeActivity extends ManagedActivity {
         // Register Handler
         registerBox = (FrameLayout) findViewById(R.id.registerBox);
         registerBox.setVisibility(View.GONE);
+
+        // Info Handler
+        infoBox = (FrameLayout) findViewById(R.id.infoBox);
+        infoBox.setVisibility(View.GONE);
+        ((TextView) findViewById(R.id.infotext)).setMovementMethod(new ScrollingMovementMethod());
 
         // Update Handler
         updateBar = (FrameLayout) findViewById(R.id.updateBar);
@@ -139,7 +146,17 @@ public class WelcomeActivity extends ManagedActivity {
     }
 
     void displayInfo() {
-        // TODO : show INFO Page
+        // OK Button
+        Button okInfo = (Button) findViewById(R.id.infoOK);
+        okInfo.setTypeface(this.defaultFont);
+        okInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                infoBox.setVisibility(View.GONE);
+            }
+        });
+
+        infoBox.setVisibility(View.VISIBLE);
     }
 
     void alertExpired(final boolean majorBreak) {
