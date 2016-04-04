@@ -390,7 +390,7 @@ public class Manager extends Service {
                 // STOP
                 else if (action.equals("stop")) {
                     mail("stop").to(WelcomeActivity.class).add("atTime",atTime).send();
-                    lightOff();
+                    //lightOff();
                 }
 
 

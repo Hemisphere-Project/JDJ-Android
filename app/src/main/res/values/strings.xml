@@ -47,6 +47,13 @@
     <string name="register_text3">Votre numéro ne sera transmis à aucun tiers, et servira uniquement à vous tenir au courant des évènements concernant la représentation choisie.</string>
     <string name="register_bye">Bon spectacle !</string>
 
+    <string name="info_title">Information</string>
+    <string name="info_text">
+        - JOURNAL d’un SEUL JOUR invite le spectateur à une aventure de 24 heures en plusieurs épisodes, de midi à midi. Chacun peut suivre l’ensemble des pièces, quelques-unes ou une seule. Chaque épisode, de 5 à 40 minutes, est un maillon de l’histoire tout en étant un récit en soi.\n\n
+        - Des épisodes sont annoncés dans une programmation, d’autres convoquent le public à des rendez-vous secrets par message téléphonique, via les réseaux sociaux, un journal… D’autres enfin sont des infiltrations clandestines dans la ville, sans préavis.\n\n
+        - Les séquences se déroulent dans des lieux choisis de la ville, emblèmes de ses urbanités multiples.
+    </string>
+
     <string name="audio_shutter">audio shutter</string>
     <string name="replay_shutter">replay shutter</string>
     <string name="replay">replay</string>

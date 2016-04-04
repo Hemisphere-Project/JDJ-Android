@@ -3,19 +3,14 @@ package com.hmsphr.jdj.Components;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.zeromq.ZMQ;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.SystemClock;
 import android.util.Log;
 
 import com.github.nkzawa.emitter.Emitter;
-import com.google.gson.Gson;
-import com.hmsphr.jdj.Activities.WelcomeActivity;
 import com.hmsphr.jdj.BuildConfig;
 import com.hmsphr.jdj.Class.Mailbox;
 import com.hmsphr.jdj.Class.ThreadComponent;
@@ -28,12 +23,6 @@ import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
 
@@ -44,10 +33,6 @@ public class RemoteControl extends ThreadComponent {
 
     private boolean PLAYER_READY = false; // dispatch flag between player and notifier
     private boolean PERFORM_REGISTRATION = false; // DO REGISTER FLAG
-
-    private ZMQ.Context context = ZMQ.context(1);
-    private ZMQ.Socket remotePublisher = context.socket(ZMQ.SUB);
-    private ZMQ.Poller poller = new ZMQ.Poller(100);
 
     private Socket mSocket;
     private ReentrantLock LOCK = new ReentrantLock();
@@ -99,7 +84,7 @@ public class RemoteControl extends ThreadComponent {
 
         // Configure WebSocket
         try {
-            mSocket = IO.socket(String.format("http://%s:%d",
+            mSocket = IO.socket(String.format("https://%s:%d",
                     appContext.getResources().getString(R.string.IP_PROXY),
                     appContext.getResources().getInteger(R.integer.PORT_CMD)));
         } catch (URISyntaxException e) {}
@@ -354,7 +339,7 @@ public class RemoteControl extends ThreadComponent {
             // Get Version
             serverVersion[0] = obj.getJSONObject("version").getInt("main");
             serverVersion[1] = obj.getJSONObject("version").getInt("major");
-            serverVersion[2] = obj.getJSONObject("version").getInt("minor");
+            serverVersion[2] = obj.getJSONObject("version").getInt("android-minor");
 
             // Get LVC Task
             if (obj.has("lvc")) lvcTask = obj.getJSONObject("lvc");
