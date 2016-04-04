@@ -99,7 +99,7 @@ public class RemoteControl extends ThreadComponent {
 
         // Configure WebSocket
         try {
-            mSocket = IO.socket(String.format("http://%s:%d",
+            mSocket = IO.socket(String.format("https://%s:%d",
                     appContext.getResources().getString(R.string.IP_PROXY),
                     appContext.getResources().getInteger(R.integer.PORT_CMD)));
         } catch (URISyntaxException e) {}
