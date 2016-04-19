@@ -44,6 +44,7 @@ public class RemoteControl extends ThreadComponent {
     private boolean CONNECTED = false;
     private boolean CONNECTING = false;
     private boolean PREPARED = false;
+    private int CONFAIL = 100;
     private int STATE = -1;
 
     // CONSTRUCTOR
@@ -63,9 +64,11 @@ public class RemoteControl extends ThreadComponent {
 
     // STATE
     private void setState(int state) {
+        //if (STATE == state) return;
+
         STATE = state;
         if (isMyServiceRunning(Manager.class))
-            mail("update_state").to(Manager.class).add("state", STATE).send();
+            mail("change_state").to(Manager.class).add("state", STATE).send();
     }
 
     // CHECK NETWORK AVAILABILITY
@@ -84,7 +87,7 @@ public class RemoteControl extends ThreadComponent {
 
         // Configure WebSocket
         try {
-            mSocket = IO.socket(String.format("https://%s:%d",
+            mSocket = IO.socket(String.format("http://%s:%d",
                     appContext.getResources().getString(R.string.IP_PROXY),
                     appContext.getResources().getInteger(R.integer.PORT_CMD)));
         } catch (URISyntaxException e) {}
@@ -94,7 +97,23 @@ public class RemoteControl extends ThreadComponent {
             @Override
             public void call(Object... args) {
                 CONNECTED = true;
+                CONFAIL = 0;
                 Log.d("RC-client", "Connected !");
+            }
+
+        })
+
+        .on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.e("RC-client", "socketIO Conn Error ! " + args[0]);
+            }
+
+        })
+        .on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.e("RC-client", "socketIO Timeout ! " + args[0]);
             }
 
         })
@@ -108,7 +127,8 @@ public class RemoteControl extends ThreadComponent {
                 JSONObject obj = new JSONObject();
                 try {
                     if (userId >= 0) obj.put("userid", userId);
-                } catch (JSONException e) {}
+                } catch (JSONException e) {
+                }
                 mSocket.emit("iam", obj);
             }
         })
@@ -137,26 +157,28 @@ public class RemoteControl extends ThreadComponent {
 
         })
 
-                // ON DISCONNECT
-        .on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                CONNECTED = false;
-                Log.d("RC-client", "Disconnected !");
-                setState(Manager.STATE_INIT);
-            }
+        // ON DISCONNECT
+                .on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+                    @Override
+                    public void call(Object... args) {
+                        CONNECTED = false;
+                        Log.d("RC-client", "Disconnected !");
+                        setState(Manager.STATE_INIT);
+                    }
 
-        });
+                });
 
+        Log.d("RC-client", "WS prepared ");
         PREPARED = true;
     }
 
     // START TRYING TO CONNECT
     private void connect() {
         if (!CONNECTING) {
+            Log.d("RC-client", "Connecting.. ");
+            CONNECTING = true;
             setState(Manager.STATE_INIT);
             mSocket.connect();
-            CONNECTING = true;
         }
     }
 
@@ -170,7 +192,10 @@ public class RemoteControl extends ThreadComponent {
 
     // Re-Try CONNECT while not successful
     private void checkConnect() {
-        if (!CONNECTED) {
+        if (!CONNECTED) CONFAIL++;
+
+        if (CONFAIL > 30) {
+            CONFAIL = 0;
             disconnect();
             connect();
         }

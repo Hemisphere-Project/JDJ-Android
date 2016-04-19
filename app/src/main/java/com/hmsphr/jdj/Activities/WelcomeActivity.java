@@ -104,7 +104,7 @@ public class WelcomeActivity extends ManagedActivity {
             String msg = intent.getStringExtra("message");
 
             // New STATE
-            if (msg.equals("update_state")) updateState(intent.getIntExtra("state", -1));
+            if (msg.equals("inform_state")) updateState(intent.getIntExtra("state", -1));
 
             // Version expired
             else if (msg.equals("broken_version")) alertExpired(intent.getBooleanExtra("major", false), intent.getBooleanExtra("popup", true));

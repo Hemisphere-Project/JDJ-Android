@@ -66,6 +66,7 @@ public class Manager extends Service {
      */
     private Mailbox mail(String msg) {
         Mailbox mail = new Mailbox();
+        if (APP_MODE <= MODE_STANDBY) mail.lock();
         return mail.put(msg).from(this);
     }
 
@@ -74,7 +75,7 @@ public class Manager extends Service {
      */
     protected int ACTIVITY_LINKED = 0;
     private int APP_MODE = 0;
-    private int APP_STATE = 0;
+    private int APP_STATE = -1;
 
     public static final int MODE_BROKEN = -1;
     public static final int MODE_STANDBY = 0;
@@ -82,6 +83,7 @@ public class Manager extends Service {
     public static final int MODE_WELCOME = 2;
     public static final int MODE_PLAY = 3;
 
+    public static final int STATE_NONE = -1;
     public static final int STATE_INIT = 0;
     public static final int STATE_NONET = 1;
     public static final int STATE_NOSERV = 2;
@@ -113,12 +115,14 @@ public class Manager extends Service {
     }
 
     public void setState(int state) {
+        //if (APP_STATE == state) return;
+
         APP_STATE = state;
         Log.d("jdj-Manager", "Manager STATE: " + APP_STATE);
 
-        // Send State to Welcome activity
-        if ((APP_MODE == MODE_WELCOME) || (APP_MODE > MODE_WELCOME && APP_STATE < STATE_READY))
-            mail("update_state").to(WelcomeActivity.class).add("state", APP_STATE).send();
+        // Send State to Welcome activity (if Active)
+        if (APP_MODE == MODE_WELCOME)
+            mail("inform_state").to(WelcomeActivity.class).add("state", APP_STATE).send();
 
         // Inform RemoteControl of player state
         remoteControl.playerReady(this.readyToPlay());
@@ -146,6 +150,7 @@ public class Manager extends Service {
     STOP APP
      */
     public void standbyApp() {
+        setMode(MODE_STANDBY);
         sendBroadcast(new Intent("exit_jdj"));
     }
 
@@ -396,6 +401,14 @@ public class Manager extends Service {
 
             }
 
+            else if (msg.equals("video_end") ) {
+                if (APP_STATE < STATE_READY)
+                    mail("inform_state").to(WelcomeActivity.class).add("state", APP_STATE).send();
+            }
+            else if (msg.equals("video_freeze") ) {
+                mail("inform_state").to(WelcomeActivity.class).add("state", APP_STATE).send();
+            }
+
                 // CLOSE APP & SERVICE
             else if (msg.equals("application_timeout") || msg.equals("application_stop")) {
                 stopApp();
@@ -418,7 +431,7 @@ public class Manager extends Service {
             else if (msg.equals("version_minor_outdated")) advertiseUpdate();
 
                 // UPDATE STATE
-            else if (msg.equals("update_state")) setState(intent.getIntExtra("state", STATE_INIT));
+            else if (msg.equals("change_state")) setState(intent.getIntExtra("state", STATE_INIT));
 
                 // REGISTRATION
             else if (msg.equals("do_register")) remoteControl.registrationReady(true);

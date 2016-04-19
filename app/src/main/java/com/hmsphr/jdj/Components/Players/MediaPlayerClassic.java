@@ -16,12 +16,15 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.VideoView;
 
+import com.hmsphr.jdj.Activities.VideoActivity;
+import com.hmsphr.jdj.Class.MediaActivity;
+
 /**
  * Created by mgr on 26/10/15.
  */
 public class MediaPlayerClassic implements PlayerCompat {
 
-    private Activity context;
+    private VideoActivity    context;
     private Uri contentUri;
     private String lastUrl;
     private int playerPosition;
@@ -47,7 +50,7 @@ public class MediaPlayerClassic implements PlayerCompat {
     private boolean replayEnable = false;
 
 
-    public MediaPlayerClassic(Activity ctx, VideoView vview, ImageView aview, FrameLayout shutter) {
+    public MediaPlayerClassic(VideoActivity ctx, VideoView vview, ImageView aview, FrameLayout shutter) {
         context = ctx;
         videoView = vview;
         playerPosition = 0;
@@ -92,6 +95,7 @@ public class MediaPlayerClassic implements PlayerCompat {
                         playerState = STATE_STOP;
                         if (replayEnable) replayShutter.setVisibility(View.VISIBLE);
                         Log.d("jdj-VideoClassic", "Player END");
+                        context.onVideoEnd();
 
                         if (resumeToPosition) {
                             playerPosition = 0;

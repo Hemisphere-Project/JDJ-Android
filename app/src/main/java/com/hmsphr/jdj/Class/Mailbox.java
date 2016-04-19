@@ -20,6 +20,7 @@ public class Mailbox {
     private String message;
     private Class destination;
     private long timestamp = 0;
+    private boolean locked = false;
 
     public Mailbox() { }
     public Mailbox put(String msg)  {
@@ -59,6 +60,10 @@ public class Mailbox {
         intent.putExtra(key, value);
         return this;
     }
+    public Mailbox lock() {
+        this.locked = true;
+        return this;
+    }
     public void send() {
 
         // Timestamp
@@ -79,6 +84,9 @@ public class Mailbox {
 
     private void doSend() {
         //if (!Mailbox.enable && isService()) return;
+        if (this.locked) {
+            Log.e("jdj-Mailbox", "Mail locked, message discarded: " + message + " To: " + destination.getSuperclass());
+        }
         Log.d("jdj-Mailbox", "Message posted from: " + context.getClass() + " To: " + destination.getSuperclass() + " :: " + message);
         if (isActivity()) context.startActivity(intent);
         else if (isService()) context.startService(intent);

@@ -36,6 +36,7 @@ public class ManagedActivity extends Activity {
     protected static Class myClass = ManagedActivity.class;
     protected int MODE = Manager.MODE_STANDBY;
     protected Typeface defaultFont;
+    protected boolean CONNECTED = true;
 
     /*
     MESSAGE SENDER
@@ -55,7 +56,6 @@ public class ManagedActivity extends Activity {
             finish();
         }
     };
-
 
     // SETTINGS
     protected SharedPreferences settings() {
@@ -106,7 +106,6 @@ public class ManagedActivity extends Activity {
         super.onResume();
 
         debug("Activity resumed");
-
 
         // Fullscreen
         if (Build.VERSION.SDK_INT>10) {

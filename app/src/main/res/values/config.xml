@@ -5,7 +5,7 @@
     <integer name="NOTIFICATION_TIMEOUT">30</integer> <!-- Seconds -->
 
     <string name="IP_PROXY">app.journaldunseuljour.fr</string>
-    <integer name="PORT_CMD">8081</integer>
+    <integer name="PORT_CMD">8083</integer>
     <integer name="PORT_TIME">8082</integer>
 
 </resources>

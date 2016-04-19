@@ -1,5 +1,7 @@
 package com.hmsphr.jdj.Class;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -82,6 +84,7 @@ public class MediaActivity extends ManagedActivity {
         }, Math.max(0, atTime - SystemClock.elapsedRealtime()));
     }
 
+
     @Override
     public void onRestart() {
         super.onRestart();
@@ -101,5 +104,7 @@ public class MediaActivity extends ManagedActivity {
         super.onDestroy();
         if (player != null) player.stop();
     }
+
+
 
 }

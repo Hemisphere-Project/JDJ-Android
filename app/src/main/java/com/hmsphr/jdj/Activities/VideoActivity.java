@@ -14,6 +14,7 @@ import com.hmsphr.jdj.Class.MediaActivity;
 import com.hmsphr.jdj.Components.Players.MediaPlayerClassic;
 import com.hmsphr.jdj.Components.Players.MediaPlayerExo;
 import com.hmsphr.jdj.R;
+import com.hmsphr.jdj.Services.Manager;
 
 public class VideoActivity extends MediaActivity {
 
@@ -55,6 +56,11 @@ public class VideoActivity extends MediaActivity {
         onNewIntent(getIntent());
     }
 
+    public void onVideoEnd() {
+        mail("video_end").to(Manager.class).send();
+    }
 
-
+    public void onVideoFreeze() {
+        mail("video_freeze").to(Manager.class).send();
+    }
 }

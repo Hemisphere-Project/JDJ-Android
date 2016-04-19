@@ -21,6 +21,8 @@ import com.google.android.exoplayer.ExoPlayer;
 import com.google.android.exoplayer.audio.AudioCapabilities;
 import com.google.android.exoplayer.audio.AudioCapabilitiesReceiver;
 import com.google.android.exoplayer.util.Util;
+import com.hmsphr.jdj.Activities.VideoActivity;
+import com.hmsphr.jdj.Class.MediaActivity;
 import com.hmsphr.jdj.Components.Players.ExoPlayer.EventLogger;
 import com.hmsphr.jdj.Components.Players.ExoPlayer.ExPlayer;
 import com.hmsphr.jdj.Components.Players.ExoPlayer.ExPlayer.RendererBuilder;
@@ -57,8 +59,9 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
     private FrameLayout replayOverlay;
     private ImageButton replayBtn;
     private boolean replayEnable = false;
+    private int playerErrors = 0;
 
-    private Activity context;
+    private VideoActivity context;
     private AudioCapabilitiesReceiver audioCapabilitiesReceiver;
     private AudioCapabilities audioCapabilities;
 
@@ -71,7 +74,7 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
 
 
 
-    public MediaPlayerExo(Activity ctx, AspectRatioFrameLayout frameV, SurfaceView surfaceV, ImageView aview, FrameLayout shutter) {
+    public MediaPlayerExo(VideoActivity ctx, AspectRatioFrameLayout frameV, SurfaceView surfaceV, ImageView aview, FrameLayout shutter) {
         context = ctx;
         videoFrame = frameV;
         surfaceView = surfaceV;
@@ -102,6 +105,7 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
         if (url.endsWith("m3u8")) contentType = TYPE_HLS;
         else contentType = TYPE_OTHER;
 
+        playerErrors = 0;
         launchPlayer(atTime);
         grabAudio();
     }
@@ -216,6 +220,7 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
                 playerState = STATE_PLAY;
             }
         }, Math.max(0, atTime - SystemClock.elapsedRealtime()));
+        // TODO: Rattraper retard audio si atTime - SystemClock.elapsedRealtime() est négatif
     }
 
     private void releasePlayer(boolean savePosition) {
@@ -240,6 +245,7 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
 
     public void onPlaybackEnd() {
         Log.d("jdj-ExoPlayer", "Player END");
+        context.onVideoEnd();
         playerState = STATE_STOP;
         if (replayEnable) replayShutter.setVisibility(View.VISIBLE);
         // LOOP
@@ -304,10 +310,16 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
 
     @Override
     public void onError(Exception e) {
-        Log.d("jdj-ExoPlayer", "Player ERROR");
-        playerNeedsPrepare = true;
-        grabAudio();
-        launchPlayer();
+        Log.d("jdj-ExoPlayer", "Player ERROR "+playerErrors);
+        playerErrors++;
+        if (playerErrors >= 2) {
+            context.onVideoFreeze();
+        }
+        else {
+            playerNeedsPrepare = true;
+            grabAudio();
+            launchPlayer();
+        }
     }
 
     @Override
