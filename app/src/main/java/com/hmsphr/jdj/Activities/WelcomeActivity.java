@@ -107,7 +107,7 @@ public class WelcomeActivity extends ManagedActivity {
             if (msg.equals("update_state")) updateState(intent.getIntExtra("state", -1));
 
             // Version expired
-            else if (msg.equals("broken_version")) alertExpired(intent.getBooleanExtra("major", false));
+            else if (msg.equals("broken_version")) alertExpired(intent.getBooleanExtra("major", false), intent.getBooleanExtra("popup", true));
         }
 
     }
@@ -159,18 +159,20 @@ public class WelcomeActivity extends ManagedActivity {
         infoBox.setVisibility(View.VISIBLE);
     }
 
-    void alertExpired(final boolean majorBreak) {
+    void alertExpired(final boolean majorBreak, final boolean popup) {
 
         Log.d("WELCOME-activity", "BROKEN VERSION !");
 
         // Update Bar
-        updateBar.setVisibility(View.GONE);
+        updateBar.setVisibility(View.VISIBLE);
         updateBar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                alertExpired(majorBreak);
+                alertExpired(majorBreak, true);
             }
         });
+
+        if (!popup) return;
 
         // Go to Google Play Button
         Button updateGO = (Button) findViewById(R.id.updateGO);
@@ -282,14 +284,15 @@ public class WelcomeActivity extends ManagedActivity {
             public void onClick(View v) {
                 // TODO: Check phone number validity !
 
-                // FIND SHOW
-                Show myShow = showlist.find( registerShow.getSelectedItem().toString() );
+                //  SAVE SHOW
+                if (registerShow.getSelectedItem() != null)
+                {
+                    Show myShow = showlist.find(registerShow.getSelectedItem().toString());
+                    settings().edit().putString("com.hmsphr.jdj.show", myShow.export()).commit();
+                }
 
-                // SAVE Locally
-                settings().edit().putString("com.hmsphr.jdj.phone", registerPhone.getText().toString())
-                    .putString("com.hmsphr.jdj.show", myShow.export())
-                    .commit();
-
+                // SAVE PHONE
+                settings().edit().putString("com.hmsphr.jdj.phone", registerPhone.getText().toString()).commit();
 
                 // HIDE Box
                 registerBox.setVisibility(View.GONE);

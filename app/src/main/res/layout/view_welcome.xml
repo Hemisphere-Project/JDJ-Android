@@ -112,6 +112,24 @@
             android:padding="2dp" />
     </FrameLayout>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="0.4.2"
+        android:id="@+id/versionText"
+        android:textColor="#dcdcdc"
+        android:textSize="13dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentStart="false"
+        android:layout_marginLeft="10dp"
+        android:layout_marginBottom="5dp"
+        android:background="#00ffffff"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="10dp" />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -420,23 +438,5 @@
 
         </LinearLayout>
     </FrameLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="0.4.2"
-        android:id="@+id/versionText"
-        android:textColor="#dcdcdc"
-        android:textSize="13dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="false"
-        android:layout_alignParentStart="false"
-        android:layout_marginLeft="10dp"
-        android:layout_marginBottom="5dp"
-        android:background="#00ffffff"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="10dp" />
 
 </RelativeLayout>

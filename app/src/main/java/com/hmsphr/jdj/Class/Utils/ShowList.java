@@ -40,20 +40,26 @@ public class ShowList {
 
     public String[] itemsList() {
         List<String> list = new ArrayList<>();
-        for (int i = 0; i < showlist.size(); i++) {
-            list.add(i, showlist.get(i).label());
+        int size = 0;
+        if (showlist != null) {
+            for (int i = 0; i < showlist.size(); i++) {
+                list.add(i, showlist.get(i).label());
+            }
+            size = list.size();
         }
-        return list.toArray(new String[list.size()]);
+
+        return list.toArray(new String[size]);
     }
 
     public Show find(String item) {
-        for (int i = 0; i < showlist.size(); i++) {
-            if (showlist.get(i).label().equals(item))
-            {
-                Log.d("ShowList", "show found");
-                return showlist.get(i);
+        if (showlist != null)
+            for (int i = 0; i < showlist.size(); i++) {
+                if (showlist.get(i).label().equals(item))
+                {
+                    Log.d("ShowList", "show found");
+                    return showlist.get(i);
+                }
             }
-        }
         return null;
     }
 }

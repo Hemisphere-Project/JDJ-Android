@@ -220,7 +220,7 @@ public class Manager extends Service {
 
     public void advertiseUpdate() {
         if (APP_MODE == MODE_WELCOME) {
-            if (UPDATE_INFO) mail("broken_version").to(WelcomeActivity.class).send();
+            mail("broken_version").to(WelcomeActivity.class).add("popup", UPDATE_INFO).send();
             UPDATE_INFO = false;
         }
     }
