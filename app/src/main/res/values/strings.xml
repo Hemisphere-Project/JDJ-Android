@@ -25,7 +25,7 @@
     <string name="failed">Playback failed</string>
 
     <string name="welcome_connecting">Connexion au serveur de Spectacle en cours..</string>
-    <string name="welcome_nonetwork">Aucune connexion au réseau..\nVérifiez que vous êtes connecté à internetvia Wifi ou 3G/4G !</string>
+    <string name="welcome_nonetwork">Aucune connexion au réseau..\nVérifiez que vous êtes connecté à internet via Wifi ou 3G/4G !</string>
     <string name="welcome_noserver">Impossible de joindre le serveur..\nVous serez alerté lorsque la communication sera rétablie.</string>
     <string name="welcome_nouser">Vous devez vous inscrire à un spectacle..</string>
     <string name="welcome_showpast">Le spectacle est terminé..\nMerci de nous avoir suivi !</string>

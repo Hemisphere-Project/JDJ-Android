@@ -24,6 +24,7 @@ public class TextActivity extends MediaActivity {
 
         // Transfer first intent
         onNewIntent(getIntent());
+        // //
     }
 
 

@@ -108,6 +108,10 @@ public class ManagedActivity extends Activity {
         debug("Activity resumed");
 
         // Fullscreen
+        this.fullscreen();
+    }
+
+    protected void fullscreen() {
         if (Build.VERSION.SDK_INT>10) {
             // Hide both the navigation bar and the status bar.
             View decorView = getWindow().getDecorView();

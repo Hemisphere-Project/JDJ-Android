@@ -46,6 +46,7 @@ public class RemoteControl extends ThreadComponent {
     private boolean PREPARED = false;
     private int CONFAIL = 100;
     private int STATE = -1;
+    public int MODE = 0;
 
     // CONSTRUCTOR
     public RemoteControl(Context ctx) {
@@ -62,7 +63,7 @@ public class RemoteControl extends ThreadComponent {
         PERFORM_REGISTRATION = isReady;
     }
 
-    // STATE
+    // STATE (to Manager)
     private void setState(int state) {
         //if (STATE == state) return;
 
@@ -194,7 +195,10 @@ public class RemoteControl extends ThreadComponent {
     private void checkConnect() {
         if (!CONNECTED) CONFAIL++;
 
-        if (CONFAIL > 30) {
+        int timeout = 10;
+        if (MODE == Manager.MODE_PLAY) timeout = 20;
+
+        if (CONFAIL > timeout) {
             CONFAIL = 0;
             disconnect();
             connect();
@@ -278,7 +282,7 @@ public class RemoteControl extends ThreadComponent {
         }
 
         // THREAD LOOP DO NOTHING: it should sleep
-        SystemClock.sleep(500);
+        SystemClock.sleep(1000);
 
     }
 
@@ -296,6 +300,7 @@ public class RemoteControl extends ThreadComponent {
         // USER
         Integer userId = null;
         String errorUser = null;
+        boolean fullHello = false;
 
         // VERSION
         int serverVersion[] = {0,0,0};
@@ -305,31 +310,6 @@ public class RemoteControl extends ThreadComponent {
 
         // PARSE Hello Object
         try {
-            // RETRIEVE user info
-            JSONObject user = obj.getJSONObject("user");
-
-            // User id
-            if (!user.isNull("id")) {
-                userId = user.getInt("id");
-                settings().edit().putInt("com.hmsphr.jdj.userid", userId).commit();
-            }
-
-            // Phone number
-            if (!user.isNull("number")) {
-                settings().edit()
-                        .putString("com.hmsphr.jdj.phone", user.getString("number"))
-                        .commit();
-            }
-
-            // Event selected
-            if (!user.isNull("event")) {
-                Show theShow = new Show(user.getJSONObject("event").getInt("id"),
-                                        user.getJSONObject("event").getString("date"),
-                                        user.getJSONObject("event").getString("place"));
-                settings().edit()
-                        .putString("com.hmsphr.jdj.show", theShow.export())
-                        .commit();
-            }
 
             // Make show list
             if (obj.has("showlist") && !obj.isNull("showlist")) {
@@ -347,27 +327,58 @@ public class RemoteControl extends ThreadComponent {
                         .commit();
             }
 
-            // ERRORS
-            if (!user.isNull("error")) {
-                Log.d("jdj-RC", "error found: "+user.getString("number"));
-                errorUser = user.getString("error");
-                settings().edit().putString("com.hmsphr.jdj.error_user", errorUser).commit();
-            }
-            else settings().edit().putString("com.hmsphr.jdj.error_user", "").commit();
-
-            // GROUP & SECTIONS
-            settings().edit().putString("com.hmsphr.jdj.group", user.getString("group")).commit();
-            settings().edit().putBoolean("com.hmsphr.jdj.section.A", user.getJSONObject("section").getBoolean("A")).commit();
-            settings().edit().putBoolean("com.hmsphr.jdj.section.B", user.getJSONObject("section").getBoolean("B")).commit();
-            settings().edit().putBoolean("com.hmsphr.jdj.section.C", user.getJSONObject("section").getBoolean("C")).commit();
-
-            // Get Version
-            serverVersion[0] = obj.getJSONObject("version").getInt("main");
-            serverVersion[1] = obj.getJSONObject("version").getInt("major");
-            serverVersion[2] = obj.getJSONObject("version").getInt("android-minor");
-
             // Get LVC Task
             if (obj.has("lvc")) lvcTask = obj.getJSONObject("lvc");
+
+            // RETRIEVE user info
+            if (obj.has("user"))
+            {
+                JSONObject user = obj.getJSONObject("user");
+
+                // User id
+                if (!user.isNull("id")) {
+                    userId = user.getInt("id");
+                    settings().edit().putInt("com.hmsphr.jdj.userid", userId).commit();
+                }
+
+                // Phone number
+                if (!user.isNull("number")) {
+                    settings().edit()
+                            .putString("com.hmsphr.jdj.phone", user.getString("number"))
+                            .commit();
+                }
+
+                // Event selected
+                if (!user.isNull("event")) {
+                    Show theShow = new Show(user.getJSONObject("event").getInt("id"),
+                            user.getJSONObject("event").getString("date"),
+                            user.getJSONObject("event").getString("place"));
+                    settings().edit()
+                            .putString("com.hmsphr.jdj.show", theShow.export())
+                            .commit();
+                }
+
+                // ERRORS
+                if (!user.isNull("error")) {
+                    Log.d("jdj-RC", "error found: " + user.getString("number"));
+                    errorUser = user.getString("error");
+                    settings().edit().putString("com.hmsphr.jdj.error_user", errorUser).commit();
+                } else settings().edit().putString("com.hmsphr.jdj.error_user", "").commit();
+
+                // WILL DISPLAY REGISTER if necessary
+                fullHello = true;
+
+                // GROUP & SECTIONS
+                settings().edit().putString("com.hmsphr.jdj.group", user.getString("group")).commit();
+                settings().edit().putBoolean("com.hmsphr.jdj.section.A", user.getJSONObject("section").getBoolean("A")).commit();
+                settings().edit().putBoolean("com.hmsphr.jdj.section.B", user.getJSONObject("section").getBoolean("B")).commit();
+                settings().edit().putBoolean("com.hmsphr.jdj.section.C", user.getJSONObject("section").getBoolean("C")).commit();
+
+                // Get Version
+                serverVersion[0] = obj.getJSONObject("version").getInt("main");
+                serverVersion[1] = obj.getJSONObject("version").getInt("major");
+                serverVersion[2] = obj.getJSONObject("version").getInt("android-minor");
+            }
 
         } catch (JSONException e) { Log.d("RC-client", "invalid JSON: "+e.toString()); }
 
@@ -386,7 +397,7 @@ public class RemoteControl extends ThreadComponent {
         }
 
         // USER INFO INCOMPLETE: Trigger Register FORM
-        else if (userId == null || errorUser != null) {
+        else if (fullHello && (userId == null || errorUser != null)) {
             setState(Manager.STATE_NOUSER);
         }
 
@@ -422,7 +433,6 @@ public class RemoteControl extends ThreadComponent {
     protected void processCommand(JSONObject task) {
         //TODO
         // - check if file is available in local
-        // - use atTime for synced play
 
         if (task == null) return;
         Log.d("RC-client", "WS task: " + task);

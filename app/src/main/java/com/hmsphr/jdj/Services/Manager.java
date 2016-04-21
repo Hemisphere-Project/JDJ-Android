@@ -102,6 +102,7 @@ public class Manager extends Service {
             APP_MODE = mode;
             setState(APP_STATE);
             if (APP_MODE == MODE_WELCOME) remoteControl.start();
+            remoteControl.MODE = APP_MODE;
         }
 
         if (APP_MODE == MODE_BROKEN) mail("broken_version").to(WelcomeActivity.class).add("major", true).send();
