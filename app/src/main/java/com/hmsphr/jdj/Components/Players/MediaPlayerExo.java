@@ -70,8 +70,10 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
 
     public static final int TYPE_HLS = 2;
     public static final int TYPE_OTHER = 3;
+    private static int NOW = -1;
 
-
+    private long baganAtTime = NOW;
+    private long atTimeUse = 0;
 
 
     public MediaPlayerExo(VideoActivity ctx, AspectRatioFrameLayout frameV, SurfaceView surfaceV, ImageView aview, FrameLayout shutter) {
@@ -94,7 +96,7 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
 
     // Play file now
     public void play(String url) {
-        play(url, 0);
+        play(url, NOW);
     }
 
     // PLAY
@@ -106,13 +108,14 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
         else contentType = TYPE_OTHER;
 
         playerErrors = 0;
+        baganAtTime = atTime;
         launchPlayer(atTime);
         grabAudio();
     }
 
     public void resume() {
         if (playerPosition > 0) {
-            launchPlayer();
+            launchPlayer(NOW);
             grabAudio();
             Log.d("jdj-ExoPlayer", "Player RESUME");
         }
@@ -153,8 +156,6 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
         boolean audioCapabilitiesChanged = !audioCapabilities.equals(this.audioCapabilities);
         if (player == null || audioCapabilitiesChanged) {
             this.audioCapabilities = audioCapabilities;
-            //releasePlayer(true);
-            //launchPlayer();
         } else if (player != null) {
             player.setBackgrounded(false);
         }
@@ -173,16 +174,19 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
         }
     }
 
-    private void launchPlayer() {
-        launchPlayer(0);
-    }
-
     private void launchPlayer(long atTime) {
-        Log.d("jdj-ExoPlayer", "Player LOADING at"+atTime);
+        Log.d("jdj-ExoPlayer", "Player LOADING at "+atTime);
         playerState = STATE_LOAD;
-        //context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        if (mode != null && mode.equals("audio"))
+
+        if (mode != null && mode.equals("audio")) {
             audioShutter.setVisibility(View.VISIBLE);
+
+            // seek to position to keep sync
+            if (baganAtTime > 0 && atTime < SystemClock.elapsedRealtime()) {
+                atTime = SystemClock.elapsedRealtime()+1500; // already late so we postpone the start
+                playerPosition = atTime - baganAtTime;       // start at position shifted from baganAtTime
+            }
+        }
 
         if (player == null) {
             player = new ExPlayer(getRendererBuilder());
@@ -203,6 +207,7 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
         }
         player.setSurface(surfaceView.getHolder().getSurface());
         player.setPlayWhenReady(false);
+        atTimeUse = atTime;
 
         // Sync with atTime
         new Handler().postDelayed(new Runnable() {
@@ -218,9 +223,10 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
 
                 player.setPlayWhenReady(true);
                 playerState = STATE_PLAY;
+                Log.d("jdj-ExoPlayer", " Timer shot shift: "+(SystemClock.elapsedRealtime()-atTimeUse));
+
             }
         }, Math.max(0, atTime - SystemClock.elapsedRealtime()));
-        // TODO: Rattraper retard audio si atTime - SystemClock.elapsedRealtime() est négatif
     }
 
     private void releasePlayer(boolean savePosition) {
@@ -239,6 +245,7 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
         if (!savePosition) {
             loadShutter.setVisibility(View.VISIBLE);
             audioShutter.setVisibility(View.GONE);
+            baganAtTime = NOW;
         }
         if (replayEnable) replayShutter.setVisibility(View.GONE);
     }
@@ -247,6 +254,7 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
         Log.d("jdj-ExoPlayer", "Player END");
         context.onVideoEnd();
         playerState = STATE_STOP;
+        loadShutter.setVisibility(View.GONE);
         if (replayEnable) replayShutter.setVisibility(View.VISIBLE);
         // LOOP
         // player.seekTo(0);
@@ -318,7 +326,7 @@ public class MediaPlayerExo implements PlayerCompat, AudioCapabilitiesReceiver.L
         else {
             playerNeedsPrepare = true;
             grabAudio();
-            launchPlayer();
+            launchPlayer(NOW);
         }
     }
 

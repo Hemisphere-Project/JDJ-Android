@@ -252,7 +252,7 @@ public class WelcomeActivity extends ManagedActivity {
             builder.setTitle(" Inscription");
             builder.setMessage("Vous devez être connecté(e) au serveur du spectacle pour modifier les réglages.");
 
-            builder.setCancelable(false);
+            builder.setCancelable(true);
 
             final AlertDialog dlg = builder.create();
 

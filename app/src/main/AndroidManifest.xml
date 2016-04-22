@@ -43,18 +43,35 @@
                 <category android:name="android.intent.category.LAUNCHER" />
                 <action android:name="exit_jdj" />
             </intent-filter>
+
             <intent-filter android:label="Journal d'un seul Jour">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with "http://app.journaldunseuljour.fr” -->
-                <data android:scheme="jdjapp" />
                 <data android:scheme="http"
                     android:host="is.gd"
                     android:pathPrefix="/jdj2016" />
-                <!-- note that the leading "/" is required for pathPrefix-->
-                <!-- Accepts URIs that begin with "jdj://deeplink” -->
             </intent-filter>
+
+        </activity>
+
+        <activity
+            android:name=".Activities.WelcomeBackActivity"
+            android:screenOrientation="landscape"
+            android:label="@string/app_name"
+            android:exported="true"
+            android:launchMode="singleInstance" >
+            <intent-filter>
+                <action android:name="exit_jdj" />
+            </intent-filter>
+
+            <intent-filter android:label="Journal d'un seul Jour">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="jdjapp" />
+            </intent-filter>
+
         </activity>
 
         <activity
