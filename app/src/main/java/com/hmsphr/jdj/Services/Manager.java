@@ -9,6 +9,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
+
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.IBinder;
@@ -53,6 +57,7 @@ public class Manager extends Service {
     public Manager() {
         Log.v("jdj-Manager", "Manager started.. ");
     }
+    private Timer replayTimeout;
 
     /*
     CAMERA
@@ -236,31 +241,71 @@ public class Manager extends Service {
      */
     private void lightSwitchOn() {
         if (!lightIsOn) {
-            try {
-                if (camera == null) camera = Camera.open();
-                Camera.Parameters p = camera.getParameters();
-                p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-                camera.setParameters(p);
-                camera.startPreview();
-                lightIsOn = true;
-            } catch(Exception e) {
-                Log.e("Manager", "Camera ON error: "+e);}
+
+            // API < 23
+            if (android.os.Build.VERSION.SDK_INT < 23) {
+                try {
+                    if (camera == null) camera = Camera.open();
+                    Camera.Parameters p = camera.getParameters();
+                    p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+                    camera.setParameters(p);
+                    camera.startPreview();
+                    lightIsOn = true;
+                } catch (Exception e) {
+                    Log.e("Manager", "Camera ON error: " + e);
+                }
+            }
+            else {
+
+                // API >= 23
+                try {
+                    CameraManager camManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+                    String[] cameraId = camManager.getCameraIdList();
+                    for (int i = 0; i < cameraId.length; i++){
+                        boolean hasFlash = camManager.getCameraCharacteristics(cameraId[i]).get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
+                        if (hasFlash) camManager.setTorchMode(cameraId[i], true);
+                    }
+                    lightIsOn = true;
+                } catch (Exception e) {
+                    Log.e("Manager", "Camera ON error: " + e);
+                }
+            }
+
         }
     }
 
     private void lightSwitchOff() {
-        if (lightIsOn) {
+        // API < 23
+        if (android.os.Build.VERSION.SDK_INT < 23) {
+            if (lightIsOn) {
+                try {
+                    if (camera == null) camera = Camera.open();
+                    Camera.Parameters p = camera.getParameters();
+                    p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+                    camera.setParameters(p);
+                    camera.stopPreview();
+                    camera.release();
+                    camera = null;
+                    lightIsOn = false;
+                } catch (Exception e) {
+                    Log.e("Manager", "Camera OFF error: " + e);
+                }
+            }
+        }
+
+        // API >= 23
+        else {
             try {
-                if (camera == null) camera = Camera.open();
-                Camera.Parameters p = camera.getParameters();
-                p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-                camera.setParameters(p);
-                camera.stopPreview();
-                camera.release();
-                camera = null;
+                CameraManager camManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
+                String[] cameraId = camManager.getCameraIdList();
+                for (int i = 0; i < cameraId.length; i++){
+                    boolean hasFlash = camManager.getCameraCharacteristics(cameraId[i]).get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
+                    if (hasFlash) camManager.setTorchMode(cameraId[i], false);
+                }
                 lightIsOn = false;
-            } catch(Exception e) {
-                Log.e("Manager", "Camera OFF error: "+e);}
+            } catch (Exception e) {
+                Log.e("Manager", "Camera OFF error: " + e);
+            }
         }
     }
 
@@ -286,7 +331,7 @@ public class Manager extends Service {
             public void run(){
                 lightToggle();
             }
-        },0,500);
+        },0,300);
     }
 
     public void lightStrobeStop() {
@@ -359,8 +404,11 @@ public class Manager extends Service {
                 String param1 = intent.getStringExtra("param1");
                 long atTime = intent.getLongExtra("atTime", 0);
 
-                // TRANSLATE atTime to local time
+                // TRANSLATE atTime to local timeif (replayTimeout != null) replayTimeout.cancel();
                 if (atTime > 0) atTime = clock.translateToLocal(atTime);
+
+                // Cancel replay Timeout
+                if (replayTimeout != null) replayTimeout.cancel();
 
                 // PLAY
                 if (action.equals("play") && readyToPlay())
@@ -402,10 +450,28 @@ public class Manager extends Service {
 
             }
 
+            else if (msg.equals("video_start") ) {
+                // cancel replay timeout
+                if (replayTimeout != null) replayTimeout.cancel();
+            }
+
             else if (msg.equals("video_end") ) {
+                // connection lost: go back home
                 if (APP_STATE < STATE_READY)
                     mail("inform_state").to(WelcomeActivity.class).add("state", APP_STATE).send();
+
+                // start replay timeout before going back home
+                if (replayTimeout != null) replayTimeout.cancel();
+                replayTimeout = new Timer();
+                replayTimeout.schedule(new TimerTask(){
+                    @Override
+                    public void run(){
+                        mail("inform_state").to(WelcomeActivity.class).add("state", APP_STATE).send();
+                    }
+                },15000);
             }
+
+
             else if (msg.equals("video_freeze") ) {
                 mail("inform_state").to(WelcomeActivity.class).add("state", APP_STATE).send();
             }

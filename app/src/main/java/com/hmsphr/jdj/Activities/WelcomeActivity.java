@@ -142,14 +142,10 @@ public class WelcomeActivity extends ManagedActivity {
             text.setText(R.string.welcome_nouser);
             alertRegister();
         }
-        else if (State == Manager.STATE_SHOWPAST) {
-            text.setText(R.string.welcome_showpast);
-        }
-        else if (State == Manager.STATE_SHOWFUTURE) {
-            text.setText(R.string.welcome_showfuture);
-        }
         else if (State == Manager.STATE_SHOWTIME) {
-            text.setText(R.string.welcome_showtime);
+            String info = settings().getString("com.hmsphr.jdj.info", null);
+            if (info == null)  text.setText(R.string.welcome_showtime);
+            else text.setText(info);
         }
         else {
             text.setText("...");
@@ -265,7 +261,7 @@ public class WelcomeActivity extends ManagedActivity {
                     fullscreen();
                 }
             };
-            mHandler.postDelayed(mRunnable,4000);
+            mHandler.postDelayed(mRunnable,3000);
         }
         else
         {

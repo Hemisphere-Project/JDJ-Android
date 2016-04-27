@@ -26,10 +26,7 @@ public class MediaPlayerClassic implements PlayerCompat {
 
     private VideoActivity    context;
     private Uri contentUri;
-    private String lastUrl;
     private int playerPosition;
-
-    private boolean resumeToPosition = false;
 
     private VideoView videoView;
     private MediaPlayer player;
@@ -48,6 +45,11 @@ public class MediaPlayerClassic implements PlayerCompat {
     private FrameLayout replayOverlay;
     private ImageButton replayBtn;
     private boolean replayEnable = false;
+    private static int NOW = -1;
+
+    private long baganAtTime = NOW;
+    private long atTimeUse = 0;
+    private boolean playAfterSeek = true;
 
 
     public MediaPlayerClassic(VideoActivity ctx, VideoView vview, ImageView aview, FrameLayout shutter) {
@@ -77,7 +79,6 @@ public class MediaPlayerClassic implements PlayerCompat {
                             Log.d("jdj-VideoClassic", "Player RENDERING ? "+what);
                             loadShutter.setVisibility(View.GONE);
                         }
-
                         return true;
                     }
                 });
@@ -85,7 +86,7 @@ public class MediaPlayerClassic implements PlayerCompat {
                 mp.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
                     @Override
                     public void onSeekComplete(MediaPlayer mp) {
-                        videoView.start();
+                        if (playAfterSeek) videoView.start();
                         Log.d("jdj-VideoClassic", "Player SEEK at " + playerPosition);
                     }
                 });
@@ -96,11 +97,6 @@ public class MediaPlayerClassic implements PlayerCompat {
                         if (replayEnable) replayShutter.setVisibility(View.VISIBLE);
                         Log.d("jdj-VideoClassic", "Player END");
                         context.onVideoEnd();
-
-                        if (resumeToPosition) {
-                            playerPosition = 0;
-                            Log.d("jdj-VideoClassic", "Player RESET");
-                        }
                     }
                 });
             }
@@ -110,32 +106,43 @@ public class MediaPlayerClassic implements PlayerCompat {
 
     public void play() {
         if (replayEnable) replayShutter.setVisibility(View.GONE);
-        if (playerState == STATE_PLAY) player.seekTo(0);
+        if (playerState == STATE_PLAY) { playAfterSeek = true; player.seekTo(0); }
         else play(contentUri.toString());
     }
 
     public void play(String url) {
-        play(url, 0);
+        play(url, NOW);
     }
 
     public void play(String url, long atTime) {
         stop();
-
-        if (resumeToPosition) {
-            if (!url.equals(lastUrl)) {
-                playerPosition = 0;
-                Log.d("jdj-VideoClassic", "Player RESET");
-            }
-            lastUrl = url;
-        }
-
+        atTime = atTime-70;
+        baganAtTime = atTime;
         contentUri = Uri.parse(url);
-
-        Log.d("jdj-VideoClassic", "Player LOADING");
-        playerState = STATE_LOAD;
         videoView.setVideoURI(contentUri);
-        if (mode != null && mode.equals("audio"))
+        launchPlayer(atTime);
+    }
+
+    private void launchPlayer(long atTime) {
+        Log.d("jdj-VideoClassic", "Player LOADING at "+atTime);
+        playerState = STATE_LOAD;
+
+        if (mode != null && mode.equals("audio")) {
             audioShutter.setVisibility(View.VISIBLE);
+
+            // seek to position to keep sync
+            if (baganAtTime > 0 && atTime < SystemClock.elapsedRealtime()) {
+                atTime = SystemClock.elapsedRealtime()+1500; // already late so we postpone the start
+                playerPosition = (int) (atTime + 510 - baganAtTime);       // start at position shifted from beganAtTime
+            }
+        }
+        atTimeUse = atTime;
+
+        // seek to
+        if (playerPosition > 0) {
+            playAfterSeek = false;
+            videoView.seekTo(playerPosition);
+        }
 
         // Sync with atTime
         new Handler().postDelayed(new Runnable() {
@@ -147,14 +154,11 @@ public class MediaPlayerClassic implements PlayerCompat {
                     Log.d("jdj-VideoClassic", "Player PLAY - SYNC");
                 else Log.d("jdj-VideoClassic", "Player PLAY - OUT OF SYNC.. (not ready yet)");
                 videoView.start();
-
-                if (resumeToPosition && playerPosition > 0) {
-                    videoView.seekTo(playerPosition);
-                    Log.d("jdj-VideoClassic", "Player RESUME at " + playerPosition);
-                }
+                context.onVideoStart();
 
                 playerState = STATE_PLAY;
                 if (android.os.Build.VERSION.SDK_INT < 17) loadShutter.setVisibility(View.GONE);
+                Log.d("jdj-ExoPlayer", " Timer shot shift: "+(SystemClock.elapsedRealtime()-atTimeUse));
 
             }
         }, Math.max(0, atTime - SystemClock.elapsedRealtime()));
@@ -162,9 +166,9 @@ public class MediaPlayerClassic implements PlayerCompat {
 
     public void resume(){
         if (player != null && playerPosition > 0) {
-            videoView.seekTo(playerPosition);
             context.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             Log.d("jdj-VideoClassic", "Player RESUME");
+            launchPlayer(NOW);
         }
     }
 
@@ -182,7 +186,7 @@ public class MediaPlayerClassic implements PlayerCompat {
         loadShutter.setVisibility(View.VISIBLE);
         audioShutter.setVisibility(View.GONE);
         if (replayEnable) replayShutter.setVisibility(View.GONE);
-        if (!resumeToPosition) playerPosition = 0;
+        playerPosition = 0;
         player = null;
         Log.d("jdj-VideoClassic", "Player STOP");
     }

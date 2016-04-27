@@ -330,6 +330,10 @@ public class RemoteControl extends ThreadComponent {
             // Get LVC Task
             if (obj.has("lvc")) lvcTask = obj.getJSONObject("lvc");
 
+            // INFO to display
+            if (obj.has("info"))
+                settings().edit().putString("com.hmsphr.jdj.info", obj.getString("info")).commit();
+
             // RETRIEVE user info
             if (obj.has("user"))
             {
@@ -408,14 +412,7 @@ public class RemoteControl extends ThreadComponent {
             if (serverVersion[2] > appVersion[2])
                     mail("version_minor_outdated").to(Manager.class).send();
 
-            // Check SHOW STATE
-            // TODO: SHOW START - END STARTEGY
-            /*int showState = 0;
-            Long deltaTime = obj.getLong("nextshow") - System.currentTimeMillis();
-            Log.d("RC-client", "Delta Next show: NOW: " + System.currentTimeMillis() + " SHOW: " + obj.getLong("nextshow") + " DELTA: " + deltaTime);
-            if (deltaTime < 0) showState = Manager.STATE_SHOWPAST;
-            else if (deltaTime < 24*60*60*1000) showState = Manager.STATE_SHOWTIME;
-            else showState = Manager.STATE_SHOWFUTURE;*/
+            // Check SHOW STATE / INFO
             int showState = Manager.STATE_SHOWTIME;
             setState(showState);
 
@@ -431,8 +428,6 @@ public class RemoteControl extends ThreadComponent {
     }
 
     protected void processCommand(JSONObject task) {
-        //TODO
-        // - check if file is available in local
 
         if (task == null) return;
         Log.d("RC-client", "WS task: " + task);
@@ -503,19 +498,6 @@ public class RemoteControl extends ThreadComponent {
 
                     // STATIC CONTENT
                     if (task.has("content")) {
-
-                        // MULTIPLE CONTENT: PICK RANDOM ONE
-                        /*String[] contents = task.getString("content").split("%%");
-                        if (contents.length > 1) {
-                            for (int index = 0; index < contents.length; index++)
-                                contents[index] = contents[index].trim();
-                            List<String> list = Arrays.asList(contents);
-                            list.removeAll(Arrays.asList("", null));
-                            Random randomGenerator = new Random();
-                            int index = randomGenerator.nextInt(list.size());
-                            payload = list.get(index);
-                        }
-                        else payload = task.getString("content");*/
                         // MULTIPLE CONTENT: PICK ONE based on USERID % MSGNBR
                         String[] contents = task.getString("content").split("@%%#");
                         if (contents.length > 1) payload = contents[ settings().getInt("com.hmsphr.jdj.userid", 0) % contents.length ];

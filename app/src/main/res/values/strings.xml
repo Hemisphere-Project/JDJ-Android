@@ -28,8 +28,6 @@
     <string name="welcome_nonetwork">Aucune connexion au réseau..\nVérifiez que vous êtes connecté à internet via Wifi ou 3G/4G !</string>
     <string name="welcome_noserver">Impossible de joindre le serveur..\nVous serez alerté lorsque la communication sera rétablie.</string>
     <string name="welcome_nouser">Vous devez vous inscrire à un spectacle..</string>
-    <string name="welcome_showpast">Le spectacle est terminé..\nMerci de nous avoir suivi !</string>
-    <string name="welcome_showfuture">Le spectacle commencera bientôt !\nVous serez alerté en direct des évènements à venir..</string>
     <string name="welcome_showtime">Le spectacle est en cours, restez connecté ! </string>
 
 

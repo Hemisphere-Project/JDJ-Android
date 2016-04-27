@@ -56,6 +56,10 @@ public class VideoActivity extends MediaActivity {
         onNewIntent(getIntent());
     }
 
+    public void onVideoStart() {
+        mail("video_start").to(Manager.class).send();
+    }
+
     public void onVideoEnd() {
         mail("video_end").to(Manager.class).send();
     }
