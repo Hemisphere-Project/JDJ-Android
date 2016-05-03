@@ -8,8 +8,8 @@ android {
         applicationId "com.hmsphr.jdj"
         minSdkVersion 10
         targetSdkVersion 23
-        versionCode 24
-        versionName "1.0.9"
+        versionCode 26
+        versionName "1.0.11"
     }
     buildTypes {
         release {

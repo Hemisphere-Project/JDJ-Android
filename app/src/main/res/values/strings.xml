@@ -47,9 +47,13 @@
 
     <string name="info_title">Information</string>
     <string name="info_text">
-        - JOURNAL d’un SEUL JOUR invite le spectateur à une aventure de 24 heures en plusieurs épisodes, de midi à midi. Chacun peut suivre l’ensemble des pièces, quelques-unes ou une seule. Chaque épisode, de 5 à 40 minutes, est un maillon de l’histoire tout en étant un récit en soi.\n\n
-        - Des épisodes sont annoncés dans une programmation, d’autres convoquent le public à des rendez-vous secrets par message téléphonique, via les réseaux sociaux, un journal… D’autres enfin sont des infiltrations clandestines dans la ville, sans préavis.\n\n
-        - Les séquences se déroulent dans des lieux choisis de la ville, emblèmes de ses urbanités multiples.
+        JOURNAL d\’un SEUL JOUR est un spectacle chorégraphique dans la ville.
+        \nIl vous invite à une aventure multimédia (danse, vidéo, musique, texte)
+        \nen épisodes sur 24h, de 19h  à  19h le lendemain.
+        \n\nChacun  peut  suivre  l\'ensemble  des  pièces, quelques-unes ou une seule.
+        \nChaque fragment du spectacle est un maillon de l\'histoire tout en étant un récit en soi.
+        \nLes épisodes durent de 5 à 60 minutes.
+        \n\nCette application vous permet de suivre le spectacle durant les 24h et d\'augmenter votre expérience.
     </string>
 
     <string name="audio_shutter">audio shutter</string>

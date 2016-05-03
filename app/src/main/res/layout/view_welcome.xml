@@ -118,7 +118,7 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="0.4.2"
         android:id="@+id/versionText"
-        android:textColor="#dcdcdc"
+        android:textColor="#333333"
         android:textSize="13dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="false"
@@ -257,7 +257,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:weightSum="1"
-                android:layout_marginBottom="10dp" >
+                android:layout_marginBottom="5dp" >
 
                 <ImageView
                     android:layout_width="35dp"
@@ -271,7 +271,7 @@
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:id="@+id/textView"
                     android:text="@string/info_title"
-                    android:textSize="30dp"
+                    android:textSize="21dp"
                     android:layout_marginLeft="10dp" />
             </LinearLayout>
 
@@ -289,18 +289,77 @@
                 android:text="@string/info_text"
                 android:id="@+id/infotext"
                 android:maxLines="10"
-                android:scrollIndicators="right" />
+                android:scrollIndicators="right"
+                android:layout_weight="0.57"
+                android:textIsSelectable="false"
+                android:textSize="13dp" />
 
-            <Button
-                android:layout_width="65dp"
-                android:layout_height="27dp"
-                android:text="OK"
-                android:id="@+id/infoOK"
-                android:background="#FF494949"
-                android:textColor="#DDDDDD"
-                android:layout_gravity="right"
-                android:textAlignment="center"
-                android:layout_marginTop="20dp" />
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:weightSum="1"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="15dp">
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="27dp"
+                    android:text="Suivre le journal en ligne"
+                    android:id="@+id/button"
+                    android:background="#FF494949"
+                    android:textColor="#DDDDDD"
+                    android:layout_gravity="right"
+                    android:textAlignment="center"
+                    android:layout_weight="0.45"
+                    android:onClick="goToJDJ" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:weightSum="1">
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="27dp"
+                    android:text="Equipe et Partenaires"
+                    android:id="@+id/button3"
+                    android:background="#FF494949"
+                    android:textColor="#DDDDDD"
+                    android:layout_gravity="right"
+                    android:textAlignment="center"
+                    android:layout_marginRight="10dp"
+                    android:layout_weight="0.30"
+                    android:onClick="goToTeam" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="27dp"
+                    android:text="Soutenez nous"
+                    android:id="@+id/button2"
+                    android:background="#FF494949"
+                    android:textColor="#DDDDDD"
+                    android:layout_gravity="right"
+                    android:textAlignment="center"
+                    android:layout_weight="0.20"
+                    android:onClick="goToSupport" />
+
+                <Button
+                    android:layout_width="61dp"
+                    android:layout_height="match_parent"
+                    android:text="OK"
+                    android:id="@+id/infoOK"
+                    android:background="#FF494949"
+                    android:textColor="#DDDDDD"
+                    android:textAlignment="center"
+                    android:layout_weight="0.5"
+                    android:layout_marginLeft="60dp" />
+
+            </LinearLayout>
+
         </LinearLayout>
 
     </FrameLayout>
@@ -310,7 +369,7 @@
         android:layout_height="match_parent"
         android:background="@android:color/transparent"
         android:id="@+id/registerBox"
-        android:visibility="visible" >
+        android:visibility="gone" >
 
         <FrameLayout
             android:layout_width="match_parent"

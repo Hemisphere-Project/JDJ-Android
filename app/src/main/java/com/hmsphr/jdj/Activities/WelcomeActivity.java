@@ -152,6 +152,24 @@ public class WelcomeActivity extends ManagedActivity {
         }
     }
 
+    public void goToTeam (View view) {
+        goToUrl ( "http://compagnie-acte.fr/journal-dun-seul-jour-equipe-et-partenaires/");
+    }
+
+    public void goToJDJ (View view) {
+        goToUrl ( "http://journaldunseuljour.fr/");
+    }
+
+    public void goToSupport (View view) {
+        goToUrl ( "http://www.kisskissbankbank.com/journal-d-un-seul-jour");
+    }
+
+    private void goToUrl (String url) {
+        Uri uriUrl = Uri.parse(url);
+        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
+        startActivity(launchBrowser);
+    }
+
     void displayInfo() {
         // OK Button
         Button okInfo = (Button) findViewById(R.id.infoOK);

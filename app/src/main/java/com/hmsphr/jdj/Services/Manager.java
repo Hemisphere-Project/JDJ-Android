@@ -206,9 +206,8 @@ public class Manager extends Service {
         // vibrate + sound
         vibrate(200);
 
-        notifSound = MediaPlayer.create(this, R.raw.notifsound1);
+        notifSound = MediaPlayer.create(this, R.raw.hepappok);
         notifSound.start();
-
     }
 
     public void clearNotification() {
@@ -468,7 +467,7 @@ public class Manager extends Service {
                     public void run(){
                         mail("inform_state").to(WelcomeActivity.class).add("state", APP_STATE).send();
                     }
-                },15000);
+                },30000);
             }
 
 
