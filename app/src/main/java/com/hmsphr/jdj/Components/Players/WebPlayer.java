@@ -2,7 +2,9 @@ package com.hmsphr.jdj.Components.Players;
 
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
@@ -71,11 +73,10 @@ public class WebPlayer implements PlayerCompat {
             public void run() {
                 if (playerState == STATE_STOP) return;
 
-                else if (playerState >= STATE_READY) {
-                    Log.d("jdj-WebPlayer", "Player PLAY - SYNC");
-                    loadShutter.setVisibility(View.GONE);
-                } else Log.d("jdj-WebPlayer", "Player PLAY - OUT OF SYNC.. (not ready yet)");
+                else if (playerState >= STATE_READY) Log.d("jdj-WebPlayer", "Player PLAY - SYNC");
+                else Log.d("jdj-WebPlayer", "Player PLAY - OUT OF SYNC.. (not ready yet)");
 
+                loadShutter.setVisibility(View.GONE);
                 playerState = STATE_PLAY;
             }
         }, Math.max(0, atTime - SystemClock.elapsedRealtime()));
@@ -115,7 +116,16 @@ public class WebPlayer implements PlayerCompat {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             Log.d("jdj-WebPlayer", "trying to acces: "+url);
-            return (!url.equals(currentUrl));
+
+            if( url.startsWith("http:") || url.startsWith("https:") ) {
+                return false;
+            }
+
+            // Otherwise allow the OS to handle things like tel, mailto, etc.
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            context.startActivity( intent );
+            return true;
+
         }
 
         @Override

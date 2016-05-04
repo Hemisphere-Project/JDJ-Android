@@ -39,6 +39,7 @@ public class RemoteControl extends ThreadComponent {
 
     private String data;
     private int last_stamp = 0;
+
     private JSONObject cmd_buffer = null;
 
     private boolean CONNECTED = false;
@@ -171,6 +172,13 @@ public class RemoteControl extends ThreadComponent {
 
         Log.d("RC-client", "WS prepared ");
         PREPARED = true;
+    }
+
+    // RESET LINK
+    public void reset() {
+        last_stamp = 0;
+        disconnect();
+        connect();
     }
 
     // START TRYING TO CONNECT
@@ -491,6 +499,10 @@ public class RemoteControl extends ThreadComponent {
                 // EXTRA PARAMETER
                 if (task.has("param1")) msg.add("param1", task.getString("param1"));
                 else msg.add("param1", "");
+
+                // STORE CACHE
+                if (task.has("cache") && task.getBoolean("cache")) msg.add("cache", true);
+                else msg.add("cache", false);
 
                 // PAYLOAD (content or url)
                 String payload = null;

@@ -41,6 +41,8 @@ public class Manager extends Service {
      */
     private RemoteControl remoteControl = new RemoteControl(this);
 
+    private Intent cacheIntent = null;
+
     /*
     PARSER / CHECKER / DISPATCHER
      */
@@ -102,22 +104,33 @@ public class Manager extends Service {
 
         if (APP_MODE == mode || APP_MODE == MODE_BROKEN) return;
 
+        // back from Standby: reset connection and LVC
+        boolean comeback = false;
+        if (APP_MODE < MODE_WELCOME) comeback = true;
+
         if (APP_MODE >= MODE_STANDBY)
         {
             APP_MODE = mode;
             setState(APP_STATE);
-            if (APP_MODE == MODE_WELCOME) remoteControl.start();
+            if (APP_MODE == MODE_WELCOME) {
+                if (!remoteControl.isRunning()) remoteControl.start();
+                else if (comeback) remoteControl.reset();
+            }
             remoteControl.MODE = APP_MODE;
         }
 
         if (APP_MODE == MODE_BROKEN) mail("broken_version").to(WelcomeActivity.class).add("major", true).send();
 
         // LOG
-        if (APP_MODE == MODE_STANDBY) Log.v("jdj-Manager", "Manager disconnected: STANDBY ");
-        else Log.d("jdj-Manager", "Manager MODE: " + APP_MODE);
+        Log.d("jdj-Manager", "Manager MODE: " + APP_MODE);
 
         // Inform RemoteControl of player state
         remoteControl.playerReady( this.readyToPlay() );
+
+        // Replay
+        /*if (replay && cacheIntent != null) {
+            this.startService(cacheIntent);
+        }*/
     }
 
     public void setState(int state) {
@@ -402,6 +415,10 @@ public class Manager extends Service {
                 String payload = intent.getStringExtra("payload");
                 String param1 = intent.getStringExtra("param1");
                 long atTime = intent.getLongExtra("atTime", 0);
+                boolean cache = intent.getBooleanExtra("cache", false);
+
+                // CACHE CMD
+                if (cache) cacheIntent = intent;
 
                 // TRANSLATE atTime to local timeif (replayTimeout != null) replayTimeout.cancel();
                 if (atTime > 0) atTime = clock.translateToLocal(atTime);
